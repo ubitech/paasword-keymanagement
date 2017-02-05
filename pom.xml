@@ -1,0 +1,116 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>eu.paasword.keymanagement</groupId>
+    <artifactId>lifecycle</artifactId>
+    <packaging>pom</packaging>
+    <version>0.0.1</version>
+    <name>arcadia-framework</name>
+    <url>http://www.arcadia-framework.eu</url>
+    <description>ARCADIA Key-Management Lifecyle</description>
+  
+    <modules>			
+        <module>util</module>
+        <module>keytenantadmin</module> 
+        <module>keydbproxy</module> 
+        <module>paaswordapp</module>         
+    </modules>
+                        
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Basic Project Settings -->
+        <project.source.charset>UTF-8</project.source.charset>
+        <project.source.encoding>UTF-8</project.source.encoding>
+        <java.version.source>1.8</java.version.source>
+        <java.version.target>1.8</java.version.target>
+        <maven.compiler.plugin>3.3</maven.compiler.plugin>
+        <maven.test.plugin>2.19</maven.test.plugin>
+    </properties>
+    
+    
+    <build>	        
+        <plugins>	  
+            <!-- Java Compatibility-->  
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin}</version>
+                <configuration>
+                    <charset>${project.source.charset}</charset>
+                    <encoding>${project.source.encoding}</encoding>
+                    <source>${java.version.source}</source>
+                    <target>${java.version.target}</target>
+                </configuration>
+            </plugin> 
+        </plugins>
+    </build>
+            
+    <!-- Global Repository Settings -->  
+    <repositories>
+        <!-- Maven Central -->
+        <repository>
+            <id>MavenCentral</id>
+            <name>Maven repository</name>
+            <url>http://repo1.maven.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>  
+        <!--         Spring -->
+        <repository>
+            <id>spring-snapshots</id>
+            <url>http://repo.spring.io/snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spring-milestones</id>
+            <url>http://repo.spring.io/milestone</url>
+        </repository> 
+        <!--         Redhat Repository  -->
+        <repository>
+            <id>Redhat-techpreview-all-repository</id>
+            <name>Red Hat Tech Preview repository (all)</name>
+            <url>http://maven.repository.redhat.com/techpreview/all/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+        <!-- Ubitech Arcadia Repository -->
+        <repository>
+            <id>thirdparty</id>
+            <url>http://ci.arcadia-framework.eu/nexus/content/repositories/thirdparty</url>
+        </repository>
+        <!--  Neo4j Arcadia Repository -->
+        <repository>
+            <id>neo4j</id>
+            <url>http://m2.neo4j.org/content/repositories/releases</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>neo4j-snapshots</id>
+            <url>http://m2.neo4j.org/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+                                                                                             
+    </repositories> 
+                            
+</project>

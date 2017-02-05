@@ -1,0 +1,37 @@
+# Java
+*.class
+
+# Package Files
+*.jar
+
+# Maven
+target/
+*.log
+.log
+
+# NetBeans
+build/
+nb-configuration.xml
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+*.bak
+
+# JRebel
+nb_jr_remoting.cfg
+rebel-remote.xml
+rebel.xml
+
+# OS X
+.DS_Store
+
+# Windows
+*.bat
+
+# Semantic Authorization
+rules/
+CM-INFERRED.json
+
