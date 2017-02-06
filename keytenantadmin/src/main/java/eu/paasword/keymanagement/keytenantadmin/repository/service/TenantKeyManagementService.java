@@ -21,10 +21,14 @@ import eu.paasword.keymanagement.keytenantadmin.repository.dao.UserEntryReposito
 import eu.paasword.keymanagement.keytenantadmin.repository.domain.Tenantkey;
 import eu.paasword.keymanagement.keytenantadmin.repository.domain.Userentry;
 import eu.paasword.keymanagement.keytenantadmin.repository.service.exception.DBProxyNotAuthorizedException;
+import eu.paasword.keymanagement.model.AppKey;
+import eu.paasword.keymanagement.model.ProxyKey;
 import eu.paasword.keymanagement.util.security.SecurityUtil;
 import eu.paasword.keymanagement.util.security.SeparatedKeyContainer;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,23 +50,28 @@ public class TenantKeyManagementService {
     TenantkeyRepository tenantrepo;
     @Autowired
     UserEntryRepository userentryrepo;
-    
+
     public String generateSymmetricEnrcyptionKey(String dbproxyid) throws DBProxyNotAuthorizedException, UnsupportedEncodingException {
         SecretKey secretkey = null;
-        String secretkeyasstring;
+        String secretkeyasstring = null;
         if (authrepo.findByProxyid(dbproxyid) == null) {
             logger.info("Proxy not authorized");
             throw new DBProxyNotAuthorizedException("Proxy not Authorized");
-        } else {  //proxy is authorized
-            logger.info("AES key will be created for " + dbproxyid);
-            //generate a key and the subkeys
-            secretkey = SecurityUtil.generateAESKey();
-            Tenantkey tenantkey = new Tenantkey();
-            tenantkey.setProxyid(dbproxyid);
-            secretkeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(secretkey).getBytes("UTF-8"));
-            tenantkey.setSecretkey(secretkeyasstring);
-            tenantrepo.save(tenantkey);
-        }//else
+        } else //proxy is authorized
+         if (tenantrepo.findByProxyid(dbproxyid) != null) {
+                //symmetric key already exists
+                logger.info("AES key already exists for " + dbproxyid);
+                secretkeyasstring = tenantrepo.findByProxyid(dbproxyid).getSecretkey();
+            } else {
+                logger.info("AES key will be created for " + dbproxyid);
+                //generate a key and the subkeys
+                secretkey = SecurityUtil.generateAESKey();
+                Tenantkey tenantkey = new Tenantkey();
+                tenantkey.setProxyid(dbproxyid);
+                secretkeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(secretkey).getBytes("UTF-8"));
+                tenantkey.setSecretkey(secretkeyasstring);
+                tenantrepo.save(tenantkey);
+            }
         return secretkeyasstring;
     }//EoM
 
@@ -73,10 +82,12 @@ public class TenantKeyManagementService {
         //is it a valid aes key?
         String unencrypted = "test";
         byte[] symencrypted = SecurityUtil.encryptSymmetrically(aeskey, unencrypted);
-        String symdecrypted = SecurityUtil.decryptSymmetrically(aeskey, symencrypted);        
-        if (unencrypted.equals(symdecrypted)) logger.info("It is a valid key!");
+        String symdecrypted = SecurityUtil.decryptSymmetrically(aeskey, symencrypted);
+        if (unencrypted.equals(symdecrypted)) {
+            logger.info("It is a valid key!");
+        }
         //Split the keys
-        SeparatedKeyContainer separated = SecurityUtil.splitKeyInParts(aeskey);        
+        SeparatedKeyContainer separated = SecurityUtil.splitKeyInParts(aeskey);
         //Create DAO entity
         Userentry userentry = new Userentry();
         userentry.setUserid(userid);
@@ -89,8 +100,28 @@ public class TenantKeyManagementService {
         userentry.setProxykey(proxykeyasstring);
         //---
         userentryrepo.save(userentry);
-        
+
         return "ok";
     }//EoM
 
+    public List<AppKey> getappkeys(String dbproxyid) {
+        List<AppKey> appkeys = new ArrayList<>();
+        List<Userentry> userentries = userentryrepo.findAll();
+        for (Userentry userentry : userentries) {
+            appkeys.add(new AppKey(dbproxyid, userentry.getAppkey(), userentry.getUserid()));
+        }//for
+        return appkeys;
+    }//EoM
+
+    public List<ProxyKey> getproxykeys(String dbproxyid) {
+        List<ProxyKey> proxykeys = new ArrayList<>();
+        List<Userentry> userentries = userentryrepo.findAll();
+        for (Userentry userentry : userentries) {
+            proxykeys.add(new ProxyKey(dbproxyid, userentry.getProxykey(), userentry.getUserid()));
+        }//for
+        return proxykeys;
+    }//EoM
+
+    
+    
 }//EoC

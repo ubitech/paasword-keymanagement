@@ -13,15 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package eu.paasword.keymanagement.util.transfer;
+package eu.paasword.keymanagement.keydbproxy.repository.dao;
 
+import eu.paasword.keymanagement.keydbproxy.repository.domain.Proxyconfig;
+import javax.transaction.Transactional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author Panagiotis Gouvas (pgouvas@ubitech.eu)
  */
-public enum BasicResponseCode implements ResponseCode {
-    SUCCESS,
-    EXCEPTION,
-    DBPROXYNOTAUTHORIZED
+@Repository
+@Transactional
+public interface ConfigurationRepository extends JpaRepository<Proxyconfig, Long>{
+    
 }

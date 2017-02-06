@@ -16,7 +16,7 @@
 package eu.paasword.keymanagement.keytenantadmin.rest;
 
 import eu.paasword.keymanagement.keytenantadmin.repository.service.TenantKeyManagementService;
-import eu.paasword.keymanagement.util.transfer.BasicResponseCode;
+import eu.paasword.keymanagement.util.transfer.ResponseCode;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -46,26 +46,51 @@ public class RestAPIController {
     @RequestMapping(value = "/createsek/{dbproxyid}", method = RequestMethod.GET)
     public RestResponse createsymmetricencryptionkey(@PathVariable("dbproxyid") String dbproxyid) {
         try {
-            return new RestResponse(BasicResponseCode.SUCCESS, "Key created", tkm.generateSymmetricEnrcyptionKey(dbproxyid));
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Key created", tkm.generateSymmetricEnrcyptionKey(dbproxyid));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
-            return new RestResponse(BasicResponseCode.EXCEPTION, ex.getMessage(), Optional.empty());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
     }//EoM       
 
     /*
-    *  This is the entry point of the Key Management Process since a proxy will 
-    *  ask the tenant to create a new key. The proxyid should be pre-authorized
+    *  This method
     */
     @RequestMapping(value = "/registeruser/{dbproxyid}/{userid}", method = RequestMethod.GET)
     public RestResponse registeruser( @PathVariable("dbproxyid") String dbproxyid , @PathVariable("userid") String userid ) {
         try {
-            return new RestResponse(BasicResponseCode.SUCCESS, "User was successfully added", tkm.createKeysForUser(dbproxyid, userid) );
+            return new RestResponse(ResponseCode.SUCCESS.name(), "User was successfully added", tkm.createKeysForUser(dbproxyid, userid) );
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
-            return new RestResponse(BasicResponseCode.EXCEPTION, ex.getMessage(), Optional.empty());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
     }//EoM         
+    
+    /*
+    *  This method
+    */
+    @RequestMapping(value = "/getappkeys/{dbproxyid}", method = RequestMethod.GET)
+    public RestResponse getappkeys( @PathVariable("dbproxyid") String dbproxyid ) {
+        try {
+            return new RestResponse(ResponseCode.SUCCESS.name(), "List successfully added", tkm.getappkeys(dbproxyid) );
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM      
+    
+    /*
+    *  This method
+    */
+    @RequestMapping(value = "/getproxykeys/{dbproxyid}", method = RequestMethod.GET)
+    public RestResponse getproxykeys( @PathVariable("dbproxyid") String dbproxyid ) {
+        try {
+            return new RestResponse(ResponseCode.SUCCESS.name(), "List successfully added", tkm.getproxykeys(dbproxyid) );
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM      
     
     
     @RequestMapping(method = RequestMethod.GET)

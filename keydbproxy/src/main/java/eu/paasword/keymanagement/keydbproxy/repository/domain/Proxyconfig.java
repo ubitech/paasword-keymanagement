@@ -32,8 +32,8 @@ import javax.validation.constraints.Size;
  * @author Panagiotis Gouvas (pgouvas@ubitech.eu)
  */
 @Entity
-@Table(name = "rsakeypair", uniqueConstraints = @UniqueConstraint(columnNames = {"id"}))
-public class Rsakeypair implements Serializable {
+@Table(name = "proxyconfig", uniqueConstraints = @UniqueConstraint(columnNames = {"id"}))
+public class Proxyconfig implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -41,19 +41,21 @@ public class Rsakeypair implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Long id;
-    
+
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 10024)
     @Column(name = "pubkey")
     private String pubkey;
-    
-    
+
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 10024)
     @Column(name = "privkey")
     private String privkey;
+
+    @Column(name = "aesconfigured", columnDefinition = "tinyint(1) default 0")
+    private Integer aesconfigured;
 
     public Long getId() {
         return id;
@@ -78,6 +80,13 @@ public class Rsakeypair implements Serializable {
     public void setPrivkey(String privkey) {
         this.privkey = privkey;
     }
-    
-        
+
+    public Integer getAesconfigured() {
+        return aesconfigured;
+    }
+
+    public void setAesconfigured(Integer aesconfigured) {
+        this.aesconfigured = aesconfigured;
+    }    
+
 }

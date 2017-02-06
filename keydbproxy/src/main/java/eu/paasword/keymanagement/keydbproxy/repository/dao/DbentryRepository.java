@@ -15,7 +15,8 @@
  */
 package eu.paasword.keymanagement.keydbproxy.repository.dao;
 
-import eu.paasword.keymanagement.keydbproxy.repository.domain.Rsakeypair;
+import eu.paasword.keymanagement.keydbproxy.repository.domain.Dbentry;
+import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -26,6 +27,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Transactional
-public interface RsakeypairRepository extends JpaRepository<Rsakeypair, Long>{
-    
+public interface DbentryRepository extends JpaRepository<Dbentry, Long>{
+    List<Dbentry> findByKey(String key);
 }

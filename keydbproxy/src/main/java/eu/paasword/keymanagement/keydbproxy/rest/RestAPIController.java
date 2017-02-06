@@ -16,7 +16,7 @@
 package eu.paasword.keymanagement.keydbproxy.rest;
 
 import eu.paasword.keymanagement.keydbproxy.repository.service.DBProxyService;
-import eu.paasword.keymanagement.util.transfer.BasicResponseCode;
+import eu.paasword.keymanagement.util.transfer.ResponseCode;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -43,10 +43,10 @@ public class RestAPIController {
     public RestResponse encryptdb() {
         try {
             logger.info("Rest request to encrypt the database");
-            return new RestResponse(BasicResponseCode.SUCCESS, "Database was configured", dbproxy.initializeDatabase() );
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Database was configured", dbproxy.initializeDatabase() );
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
-            return new RestResponse(BasicResponseCode.EXCEPTION, ex.getMessage(), Optional.empty());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
     }//EoM      
     

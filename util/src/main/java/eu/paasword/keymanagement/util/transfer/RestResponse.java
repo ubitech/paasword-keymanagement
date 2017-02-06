@@ -19,26 +19,26 @@ package eu.paasword.keymanagement.util.transfer;
  *
  * @author Panagiotis Gouvas (pgouvas@ubitech.eu)
  */
-public class RestResponse<C extends Enum<? extends ResponseCode>, R> {
+public class RestResponse<R> {
 
-    private C code;
+    private String code;
     private String message;
     private R returnobject;
 
     public RestResponse() {
     }    
     
-    public RestResponse(C code, String message, R returnobject) {
+    public RestResponse(String code, String message, R returnobject) {
         this.message = message;
         this.code = code;
         this.returnobject = returnobject;
     }
 
-    public C getCode() {
+    public String getCode() {
         return code;
     }
 
-    public void setCode(C code) {
+    public void setCode(String code) {
         this.code = code;
     }
 

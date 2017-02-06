@@ -15,10 +15,13 @@
  */
 package eu.paasword.keymanagement.util.transfer;
 
+
 /**
  *
  * @author Panagiotis Gouvas (pgouvas@ubitech.eu)
  */
-public interface ResponseCode {
-    
+public enum ResponseCode {
+    SUCCESS,
+    EXCEPTION,
+    DBPROXYNOTAUTHORIZED
 }
