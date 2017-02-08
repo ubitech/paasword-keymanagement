@@ -16,6 +16,12 @@
 package eu.paasword.keymanagement.paaswordapp.repository.service;
 
 import java.util.logging.Logger;
+
+import eu.paasword.keymanagement.paaswordapp.repository.dao.UserentryRepository;
+import eu.paasword.keymanagement.paaswordapp.repository.domain.Userentry;
+import eu.paasword.keymanagement.util.transfer.AppUserKey;
+import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +34,20 @@ public class PaaSwordService {
 
     private static final Logger logger = Logger.getLogger(PaaSwordService.class.getName());
 
-    @Value("${tenantadmin.url}")
-    private String tenantadminurl;
+    @Autowired
+    UserentryRepository userentryRepository;
 
-    @Value("${dbproxy.id}")
-    private String dbproxyid;
+    public boolean registerUser(AppUserKey appUserKey) {
+        logger.info("Register app key for the user");
+
+        Userentry userentry = new Userentry();
+        userentry.setProxyid(appUserKey.getProxyID());
+        userentry.setUserid(appUserKey.getUserID());
+        userentry.setAppkey(appUserKey.getAppKey());
+        //---
+        userentryRepository.save(userentry);
+
+        return true;
+    }//EoM
 
 }//EoC

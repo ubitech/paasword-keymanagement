@@ -15,8 +15,16 @@
  */
 package eu.paasword.keymanagement.keydbproxy.repository.service;
 
+import eu.paasword.keymanagement.keydbproxy.repository.dao.UserentryRepository;
+import eu.paasword.keymanagement.keydbproxy.repository.domain.Userentry;
+import eu.paasword.keymanagement.util.security.SecurityUtil;
+import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
+
+import java.util.Base64;
 import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -36,6 +44,9 @@ public class DBProxyService {
     @Value("${dbproxy.id}")
     private String dbproxyid;
 
+    @Autowired
+    UserentryRepository userentryRepository;
+
     //In this step the tenant-admin will be asked to create a new symmetric Key 
     //and will be fetched in order to be used only once
     public String initializeDatabase() {
@@ -51,6 +62,19 @@ public class DBProxyService {
             logger.severe("Exception during the invocation of initializeDatabase");
         }
         return result.getMessage();
+    }//EoM
+
+    public boolean registerUser(ProxyUserKey proxyUserKey) {
+        logger.info("Register proxy key for the user");
+
+        Userentry userentry = new Userentry();
+        userentry.setProxyid(proxyUserKey.getProxyID());
+        userentry.setUserid(proxyUserKey.getUserID());
+        userentry.setProxykey(proxyUserKey.getProxyKey());
+        //---
+        userentryRepository.save(userentry);
+
+        return true;
     }//EoM
 
 }//EoC

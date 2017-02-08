@@ -6,9 +6,9 @@
     <artifactId>lifecycle</artifactId>
     <packaging>pom</packaging>
     <version>0.0.1</version>
-    <name>arcadia-framework</name>
-    <url>http://www.arcadia-framework.eu</url>
-    <description>ARCADIA Key-Management Lifecyle</description>
+    <name>paasword-keymanagement</name>
+    <url>https://www.paasword.eu</url>
+    <description>PaaSword Key-Management Lifecyle</description>
   
     <modules>			
         <module>util</module>
@@ -88,29 +88,7 @@
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
-        <!-- Ubitech Arcadia Repository -->
-        <repository>
-            <id>thirdparty</id>
-            <url>http://ci.arcadia-framework.eu/nexus/content/repositories/thirdparty</url>
-        </repository>
-        <!--  Neo4j Arcadia Repository -->
-        <repository>
-            <id>neo4j</id>
-            <url>http://m2.neo4j.org/content/repositories/releases</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>neo4j-snapshots</id>
-            <url>http://m2.neo4j.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-                                                                                             
+
     </repositories> 
                             
 </project>

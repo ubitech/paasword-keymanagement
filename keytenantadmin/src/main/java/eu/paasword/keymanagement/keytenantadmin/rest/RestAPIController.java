@@ -64,7 +64,20 @@ public class RestAPIController {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
-    }//EoM         
+    }//EoM
+
+    /*
+    *  This method
+    */
+    @RequestMapping(value = "/getuserkey/{userid}", method = RequestMethod.GET)
+    public RestResponse getuserkey(@PathVariable("userid") String userid) {
+        try {
+            return new RestResponse(ResponseCode.SUCCESS.name(), "User key successfully fetched", tkm.getUserKey(userid));
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM
     
     /*
     *  This method

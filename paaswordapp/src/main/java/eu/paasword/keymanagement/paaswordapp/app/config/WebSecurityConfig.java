@@ -43,9 +43,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .antMatchers("/api/keydbproxy/**", "/api/v1/policyvalidator/**", "/api/v1/semanticauthorizationengine/**", "/api/v1/ide/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/keydbproxy/**", "/api/v1/class/**", "/api/v1/expression/**", "/api/v1/instance/**", "/api/v1/rule/**", "/api/v1/policy/**", "/api/v1/policyset/**", "/api/v1/property/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/keydbproxy/**", "/api/v1/instance/**", "/api/v1/property/**").permitAll()
+                .antMatchers("/api/paaswordapp/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/paaswordapp/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/paaswordapp/**").permitAll()
 
                 // Allow anonymous resource requests on the following URIs
                 .antMatchers("/", "/login/**", "/login", "/register").permitAll()

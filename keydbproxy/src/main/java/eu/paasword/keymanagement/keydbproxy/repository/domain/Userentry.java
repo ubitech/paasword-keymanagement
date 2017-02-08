@@ -13,28 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package eu.paasword.keymanagement.paaswordapp.repository.domain;
+package eu.paasword.keymanagement.keydbproxy.repository.domain;
 
-import java.io.Serializable;
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 /**
  *
  * @author Panagiotis Gouvas (pgouvas@ubitech.eu)
  */
 @Entity
-@Table(name = "rsakeypair", uniqueConstraints = @UniqueConstraint(columnNames = {"id"}))
-public class Rsakeypair implements Serializable {
-
+@Table(name = "userentry", uniqueConstraints = @UniqueConstraint(columnNames = {"id"}))
+public class Userentry {
+    
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,16 +35,18 @@ public class Rsakeypair implements Serializable {
     
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 10024)
-    @Column(name = "pubkey")
-    private String pubkey;
-    
-    
+    @Column(name = "userid")
+    private String userid;
+
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 10024)
-    @Column(name = "privkey")
-    private String privkey;
+    @Column(name = "proxyid")
+    private String proxyid;
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "proxykey")
+    private String proxykey;      
 
     public Long getId() {
         return id;
@@ -63,21 +56,28 @@ public class Rsakeypair implements Serializable {
         this.id = id;
     }
 
-    public String getPubkey() {
-        return pubkey;
+    public String getUserid() {
+        return userid;
     }
 
-    public void setPubkey(String pubkey) {
-        this.pubkey = pubkey;
+    public void setUserid(String userid) {
+        this.userid = userid;
     }
 
-    public String getPrivkey() {
-        return privkey;
+    public String getProxyid() {
+        return proxyid;
     }
 
-    public void setPrivkey(String privkey) {
-        this.privkey = privkey;
+    public void setProxyid(String proxyid) {
+        this.proxyid = proxyid;
     }
+
+    public String getProxykey() {
+        return proxykey;
+    }
+
+    public void setProxykey(String proxykey) {
+        this.proxykey = proxykey;
+    }    
     
-        
-}
+} //EoC

@@ -79,7 +79,6 @@ public class Userentry {
         this.proxyid = proxyid;
     }
 
-
     public String getAppkey() {
         return appkey;
     }

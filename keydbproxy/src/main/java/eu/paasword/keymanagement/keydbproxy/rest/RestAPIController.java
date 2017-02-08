@@ -16,15 +16,13 @@
 package eu.paasword.keymanagement.keydbproxy.rest;
 
 import eu.paasword.keymanagement.keydbproxy.repository.service.DBProxyService;
+import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
 import eu.paasword.keymanagement.util.transfer.ResponseCode;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  *
@@ -48,7 +46,19 @@ public class RestAPIController {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
-    }//EoM      
+    }//EoM
+
+    @RequestMapping(value = "/registeruser", method = RequestMethod.POST)
+    public RestResponse registeruser(@RequestBody ProxyUserKey proxyUserKey) {
+        try {
+            logger.info("Rest register the proxy key for a user to the database");
+
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", dbproxy.registerUser(proxyUserKey));
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM
     
     
     @RequestMapping(method = RequestMethod.GET)

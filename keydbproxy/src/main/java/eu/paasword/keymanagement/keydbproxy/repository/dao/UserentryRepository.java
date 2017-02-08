@@ -13,12 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package eu.paasword.keymanagement.paaswordapp.repository.dao;
+package eu.paasword.keymanagement.keydbproxy.repository.dao;
 
-import eu.paasword.keymanagement.paaswordapp.repository.domain.Rsakeypair;
-import javax.transaction.Transactional;
+import eu.paasword.keymanagement.keydbproxy.repository.domain.Userentry;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import javax.transaction.Transactional;
 
 /**
  *
@@ -26,6 +27,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Transactional
-public interface RsakeypairRepository extends JpaRepository<Rsakeypair, Long>{
-    
+public interface UserentryRepository extends JpaRepository<Userentry, Long>{
 }

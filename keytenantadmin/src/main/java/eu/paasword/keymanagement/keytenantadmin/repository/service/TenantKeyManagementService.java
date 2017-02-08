@@ -31,8 +31,14 @@ import java.util.Base64;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
+
+import eu.paasword.keymanagement.util.transfer.AppUserKey;
+import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
+import eu.paasword.keymanagement.util.transfer.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import sun.security.rsa.RSAPublicKeyImpl;
 
 /**
@@ -50,6 +56,18 @@ public class TenantKeyManagementService {
     TenantkeyRepository tenantrepo;
     @Autowired
     UserEntryRepository userentryrepo;
+
+    @Value("${proxy.url}")
+    String proxyURL;
+
+    @Value("${paaswordapp.url}")
+    String paaswordAppURL;
+
+    public String getUserKey(String userid) {
+
+        return userentryrepo.findByUserid(userid).getUserkey();
+
+    }//EoM
 
     public String generateSymmetricEnrcyptionKey(String dbproxyid) throws DBProxyNotAuthorizedException, UnsupportedEncodingException {
         SecretKey secretkey = null;
@@ -100,6 +118,31 @@ public class TenantKeyManagementService {
         userentry.setProxykey(proxykeyasstring);
         //---
         userentryrepo.save(userentry);
+
+        // Sending keys to proxy and app
+        RestTemplate restTemplate = new RestTemplate();
+        RestResponse result = null;
+        try {
+            String invocationurl = proxyURL + "/api/keydbproxy/registeruser";
+//            logger.info("Invodation url: " + invocationurl);
+
+            ProxyUserKey proxyUserKey = new ProxyUserKey(userid, dbproxyid, proxykeyasstring);
+
+            result = restTemplate.postForObject(invocationurl, proxyUserKey, RestResponse.class);
+
+            invocationurl = paaswordAppURL + "/api/paaswordapp/registeruser";
+//            logger.info("Invodation url: " + invocationurl);
+
+            AppUserKey appUserKey = new AppUserKey(userid, dbproxyid, appkeyasstring);
+
+            result = restTemplate.postForObject(invocationurl, appUserKey, RestResponse.class);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.severe("Exception during the invocation of register key to proxy");
+        }
+
+
 
         return "ok";
     }//EoM

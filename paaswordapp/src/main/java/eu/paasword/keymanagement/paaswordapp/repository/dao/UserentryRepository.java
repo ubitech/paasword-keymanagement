@@ -13,12 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package eu.paasword.keymanagement.keytenantadmin.repository.dao;
+package eu.paasword.keymanagement.paaswordapp.repository.dao;
 
-import eu.paasword.keymanagement.keytenantadmin.repository.domain.Userentry;
-import javax.transaction.Transactional;
+import eu.paasword.keymanagement.paaswordapp.repository.domain.Userentry;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import javax.transaction.Transactional;
 
 /**
  *
@@ -26,8 +27,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Transactional
-public interface UserEntryRepository extends JpaRepository<Userentry, Long>{
-
-    Userentry findByUserid(String userid);
+public interface UserentryRepository extends JpaRepository<Userentry, Long>{
     
 }
