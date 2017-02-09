@@ -18,6 +18,7 @@ package eu.paasword.keymanagement.keydbproxy.repository.service;
 import eu.paasword.keymanagement.keydbproxy.repository.dao.UserentryRepository;
 import eu.paasword.keymanagement.keydbproxy.repository.domain.Userentry;
 import eu.paasword.keymanagement.util.security.SecurityUtil;
+import eu.paasword.keymanagement.util.transfer.AppQueryContext;
 import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
 
@@ -75,6 +76,20 @@ public class DBProxyService {
         userentryRepository.save(userentry);
 
         return true;
+    }//EoM
+
+    public String queryHandler(AppQueryContext appQueryContext) {
+        logger.info("Querying handling..");
+
+        // Step 1: Decrypt User Key
+
+        // Step 2: Reconstruct tenant key based on user, app and proxy key
+
+        // Step 2a: Check timestamp for replay attacks (white box encryption ???)
+
+        // Step 3: Query DB and return results assymetricly encrypted
+
+        return null;
     }//EoM
 
 }//EoC

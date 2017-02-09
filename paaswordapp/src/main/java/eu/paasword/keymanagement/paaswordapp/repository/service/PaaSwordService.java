@@ -19,10 +19,9 @@ import java.util.logging.Logger;
 
 import eu.paasword.keymanagement.paaswordapp.repository.dao.UserentryRepository;
 import eu.paasword.keymanagement.paaswordapp.repository.domain.Userentry;
+import eu.paasword.keymanagement.util.transfer.ClientQueryContext;
 import eu.paasword.keymanagement.util.transfer.AppUserKey;
-import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -48,6 +47,16 @@ public class PaaSwordService {
         userentryRepository.save(userentry);
 
         return true;
+    }//EoM
+
+    public String queryHandler(ClientQueryContext appUserKey) {
+        logger.info("Querying handling..");
+
+        // Step 1: Get App Key for userID
+
+        // Step 2: Forward query to DBProxy.query
+
+        return null;
     }//EoM
 
 }//EoC

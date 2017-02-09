@@ -18,12 +18,8 @@ package eu.paasword.keymanagement.paaswordapp.rest;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import eu.paasword.keymanagement.paaswordapp.repository.dao.UserentryRepository;
 import eu.paasword.keymanagement.paaswordapp.repository.service.PaaSwordService;
-import eu.paasword.keymanagement.util.transfer.AppUserKey;
-import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
-import eu.paasword.keymanagement.util.transfer.ResponseCode;
-import eu.paasword.keymanagement.util.transfer.RestResponse;
+import eu.paasword.keymanagement.util.transfer.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +51,18 @@ public class RestAPIController {
             logger.info("Rest register the app key for a user to the database");
 
             return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", paaSwordService.registerUser(appUserKey));
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM
+
+    @RequestMapping(value = "/query", method = RequestMethod.POST)
+    public RestResponse query(@RequestBody ClientQueryContext clientQueryContext) {
+        try {
+            logger.info("Querying DB Proxy for " + clientQueryContext.getQuery());
+
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", paaSwordService.queryHandler(clientQueryContext));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());

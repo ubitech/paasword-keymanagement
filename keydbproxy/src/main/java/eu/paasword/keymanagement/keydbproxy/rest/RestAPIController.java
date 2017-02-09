@@ -15,10 +15,10 @@
  */
 package eu.paasword.keymanagement.keydbproxy.rest;
 
+import eu.paasword.keymanagement.keydbproxy.repository.dao.ConfigurationRepository;
 import eu.paasword.keymanagement.keydbproxy.repository.service.DBProxyService;
-import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
-import eu.paasword.keymanagement.util.transfer.ResponseCode;
-import eu.paasword.keymanagement.util.transfer.RestResponse;
+import eu.paasword.keymanagement.util.transfer.*;
+
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +36,9 @@ public class RestAPIController {
     
     @Autowired
     DBProxyService dbproxy;
+
+    @Autowired
+    ConfigurationRepository configurationRepository;
     
     @RequestMapping(value = "/encryptdb", method = RequestMethod.GET)
     public RestResponse encryptdb() {
@@ -48,6 +51,18 @@ public class RestAPIController {
         }
     }//EoM
 
+    @RequestMapping(value = "/getpubkey/{proxyid}", method = RequestMethod.GET)
+    public RestResponse getPublicKey(@PathVariable("proxyid") String proxyid) {
+        try {
+            logger.info("Rest request to get public key");
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Database was configured", configurationRepository.findAll().get(0).getPubkey());
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM
+
+
     @RequestMapping(value = "/registeruser", method = RequestMethod.POST)
     public RestResponse registeruser(@RequestBody ProxyUserKey proxyUserKey) {
         try {
@@ -59,7 +74,18 @@ public class RestAPIController {
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
     }//EoM
-    
+
+    @RequestMapping(value = "/query", method = RequestMethod.POST)
+    public RestResponse query(@RequestBody AppQueryContext appQueryContext) {
+        try {
+            logger.info("Querying DB Proxy for " + appQueryContext.getQuery());
+
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", dbproxy.queryHandler(appQueryContext));
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM
     
     @RequestMapping(method = RequestMethod.GET)
     public String test() {
