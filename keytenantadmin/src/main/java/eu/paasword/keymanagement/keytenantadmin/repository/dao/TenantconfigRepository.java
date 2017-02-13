@@ -15,7 +15,7 @@
  */
 package eu.paasword.keymanagement.keytenantadmin.repository.dao;
 
-import eu.paasword.keymanagement.keytenantadmin.repository.domain.Tenantkey;
+import eu.paasword.keymanagement.keytenantadmin.repository.domain.Tenantconfig;
 import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -26,6 +26,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Transactional
-public interface TenantkeyRepository extends JpaRepository<Tenantkey, Long>{
-    Tenantkey findByProxyid(String proxyid);
+public interface TenantconfigRepository extends JpaRepository<Tenantconfig, Long>{
+    
 }

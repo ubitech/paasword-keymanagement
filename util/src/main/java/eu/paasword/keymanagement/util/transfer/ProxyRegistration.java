@@ -13,21 +13,35 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package eu.paasword.keymanagement.keytenantadmin.repository.dao;
-
-import eu.paasword.keymanagement.keytenantadmin.repository.domain.Authorizedproxy;
-import java.util.List;
-import javax.transaction.Transactional;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+package eu.paasword.keymanagement.util.transfer;
 
 /**
  *
  * @author Panagiotis Gouvas (pgouvas@ubitech.eu)
  */
-@Repository
-@Transactional
-public interface AuthorizedProxyRepository extends JpaRepository<Authorizedproxy, Long> {
+public class ProxyRegistration {
+    private String proxyid;
+    private String publickey;
 
-    public List<Authorizedproxy> findByProxyid(String proxyid);
+    public ProxyRegistration(String proxyid, String publickey) {
+        this.proxyid = proxyid;
+        this.publickey = publickey;
+    }    
+    
+    public String getProxyid() {
+        return proxyid;
+    }
+
+    public void setProxyid(String proxyid) {
+        this.proxyid = proxyid;
+    }
+
+    public String getPublickey() {
+        return publickey;
+    }
+
+    public void setPublickey(String publickey) {
+        this.publickey = publickey;
+    }
+           
 }

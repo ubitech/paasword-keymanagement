@@ -48,6 +48,16 @@ public class Authorizedproxy implements Serializable {
     @Column(name = "proxyid")
     private String proxyid;
 
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 10024)
+    @Column(name = "pubkeyofproxy")
+    private String pubkeyofproxy;
+
+    @Basic(optional = true)
+    @Column(name = "secretkey")
+    private String secretkey;
+    
     public Long getId() {
         return id;
     }
@@ -63,5 +73,21 @@ public class Authorizedproxy implements Serializable {
     public void setProxyid(String proxyid) {
         this.proxyid = proxyid;
     }
+
+    public String getPubkeyofproxy() {
+        return pubkeyofproxy;
+    }
+
+    public void setPubkeyofproxy(String pubkeyofproxy) {
+        this.pubkeyofproxy = pubkeyofproxy;
+    }
+
+    public String getSecretkey() {
+        return secretkey;
+    }
+
+    public void setSecretkey(String secretkey) {
+        this.secretkey = secretkey;
+    }    
         
 }

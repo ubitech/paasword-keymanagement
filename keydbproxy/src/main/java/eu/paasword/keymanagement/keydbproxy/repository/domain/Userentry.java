@@ -27,6 +27,7 @@ import javax.validation.constraints.NotNull;
 public class Userentry {
     
     private static final long serialVersionUID = 1L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)

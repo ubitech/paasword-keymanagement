@@ -16,12 +16,15 @@
 package eu.paasword.keymanagement.keytenantadmin.rest;
 
 import eu.paasword.keymanagement.keytenantadmin.repository.service.TenantKeyManagementService;
+import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
+import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
 import eu.paasword.keymanagement.util.transfer.ResponseCode;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,19 +42,32 @@ public class RestAPIController {
     @Autowired
     TenantKeyManagementService tkm;
 
-    /*
-    *  This is the entry point of the Key Management Process since a proxy will 
-    *  ask the tenant to create a new key. The proxyid should be pre-authorized
-    */
-    @RequestMapping(value = "/createsek/{dbproxyid}", method = RequestMethod.GET)
-    public RestResponse createsymmetricencryptionkey(@PathVariable("dbproxyid") String dbproxyid) {
+    
+    @RequestMapping(value = "/registerproxy", method = RequestMethod.POST)
+    public RestResponse registeruser(@RequestBody ProxyRegistration proxiregistration) {
         try {
-            return new RestResponse(ResponseCode.SUCCESS.name(), "Key created", tkm.generateSymmetricEnrcyptionKey(dbproxyid));
+            logger.info("Rest for registering proxyid and key to the database");
+
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Proxy registered successfully", tkm.registerProxy(proxiregistration));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
-    }//EoM       
+    }//EoM    
+    
+//    /*
+//    *  This is the entry point of the Key Management Process since a proxy will 
+//    *  ask the tenant to create a new key. The proxyid should be pre-authorized
+//    */
+//    @RequestMapping(value = "/createsek/{dbproxyid}", method = RequestMethod.GET)
+//    public RestResponse createsymmetricencryptionkey(@PathVariable("dbproxyid") String dbproxyid) {
+//        try {
+//            return new RestResponse(ResponseCode.SUCCESS.name(), "Key created", tkm.generateSymmetricEnrcyptionKey(dbproxyid));
+//        } catch (Exception ex) {
+//            logger.severe(ex.getMessage());
+//            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+//        }
+//    }//EoM       
 
     /*
     *  This method

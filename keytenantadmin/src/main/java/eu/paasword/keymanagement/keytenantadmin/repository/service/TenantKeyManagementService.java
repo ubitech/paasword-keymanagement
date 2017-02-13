@@ -16,9 +16,8 @@
 package eu.paasword.keymanagement.keytenantadmin.repository.service;
 
 import eu.paasword.keymanagement.keytenantadmin.repository.dao.AuthorizedProxyRepository;
-import eu.paasword.keymanagement.keytenantadmin.repository.dao.TenantkeyRepository;
 import eu.paasword.keymanagement.keytenantadmin.repository.dao.UserEntryRepository;
-import eu.paasword.keymanagement.keytenantadmin.repository.domain.Tenantkey;
+import eu.paasword.keymanagement.keytenantadmin.repository.domain.Authorizedproxy;
 import eu.paasword.keymanagement.keytenantadmin.repository.domain.Userentry;
 import eu.paasword.keymanagement.keytenantadmin.repository.service.exception.DBProxyNotAuthorizedException;
 import eu.paasword.keymanagement.model.AppKey;
@@ -33,6 +32,7 @@ import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 
 import eu.paasword.keymanagement.util.transfer.AppUserKey;
+import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
 import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +53,6 @@ public class TenantKeyManagementService {
     @Autowired
     AuthorizedProxyRepository authrepo;
     @Autowired
-    TenantkeyRepository tenantrepo;
-    @Autowired
     UserEntryRepository userentryrepo;
 
     @Value("${proxy.url}")
@@ -69,33 +67,10 @@ public class TenantKeyManagementService {
 
     }//EoM
 
-    public String generateSymmetricEnrcyptionKey(String dbproxyid) throws DBProxyNotAuthorizedException, UnsupportedEncodingException {
-        SecretKey secretkey = null;
-        String secretkeyasstring = null;
-        if (authrepo.findByProxyid(dbproxyid) == null) {
-            logger.info("Proxy not authorized");
-            throw new DBProxyNotAuthorizedException("Proxy not Authorized");
-        } else //proxy is authorized
-         if (tenantrepo.findByProxyid(dbproxyid) != null) {
-                //symmetric key already exists
-                logger.info("AES key already exists for " + dbproxyid);
-                secretkeyasstring = tenantrepo.findByProxyid(dbproxyid).getSecretkey();
-            } else {
-                logger.info("AES key will be created for " + dbproxyid);
-                //generate a key and the subkeys
-                secretkey = SecurityUtil.generateAESKey();
-                Tenantkey tenantkey = new Tenantkey();
-                tenantkey.setProxyid(dbproxyid);
-                secretkeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(secretkey).getBytes("UTF-8"));
-                tenantkey.setSecretkey(secretkeyasstring);
-                tenantrepo.save(tenantkey);
-            }
-        return secretkeyasstring;
-    }//EoM
 
     public String createKeysForUser(String dbproxyid, String userid) throws UnsupportedEncodingException, Exception {
-        Tenantkey tenantkey = tenantrepo.findByProxyid(dbproxyid);
-        byte[] base64decodedBytes = Base64.getDecoder().decode(tenantkey.getSecretkey());
+        String tenantkey = authrepo.findByProxyid(dbproxyid).get(0).getSecretkey(); //by default only one is accepted
+        byte[] base64decodedBytes = Base64.getDecoder().decode(tenantkey);
         SecretKey aeskey = SecurityUtil.deSerializeObject(new String(base64decodedBytes, "utf-8"), SecretKey.class);
         //is it a valid aes key?
         String unencrypted = "test";
@@ -142,8 +117,6 @@ public class TenantKeyManagementService {
             logger.severe("Exception during the invocation of register key to proxy");
         }
 
-
-
         return "ok";
     }//EoM
 
@@ -165,6 +138,17 @@ public class TenantKeyManagementService {
         return proxykeys;
     }//EoM
 
-    
+    public String registerProxy(ProxyRegistration proxiregistration) {
+        if ( authrepo.findByProxyid(proxiregistration.getProxyid()).isEmpty() ){
+            Authorizedproxy authentry = new Authorizedproxy();
+            authentry.setProxyid(proxiregistration.getProxyid());
+            authentry.setPubkeyofproxy(proxiregistration.getPublickey());
+            authrepo.save(authentry);            
+        } else {
+            
+        }
+
+        return "ok";
+    }//EoM
     
 }//EoC

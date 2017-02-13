@@ -32,8 +32,8 @@ import javax.validation.constraints.Size;
  * @author Panagiotis Gouvas (pgouvas@ubitech.eu)
  */
 @Entity
-@Table(name = "tenantkey", uniqueConstraints = @UniqueConstraint(columnNames = {"id"}))
-public class Tenantkey implements Serializable {
+@Table(name = "config", uniqueConstraints = @UniqueConstraint(columnNames = {"id"}))
+public class Tenantconfig implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -41,17 +41,19 @@ public class Tenantkey implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Long id;
-    
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "secretkey")
-    private String secretkey;
 
     @Basic(optional = false)
     @NotNull
-    @Column(name = "proxyid")
-    private String proxyid;    
-    
+    @Size(min = 1, max = 10024)
+    @Column(name = "pubkey")
+    private String pubkey;
+
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 10024)
+    @Column(name = "privkey")
+    private String privkey;
+
     public Long getId() {
         return id;
     }
@@ -60,21 +62,20 @@ public class Tenantkey implements Serializable {
         this.id = id;
     }
 
-    public String getSecretkey() {
-        return secretkey;
+    public String getPubkey() {
+        return pubkey;
     }
 
-    public void setSecretkey(String secretkey) {
-        this.secretkey = secretkey;
+    public void setPubkey(String pubkey) {
+        this.pubkey = pubkey;
     }
 
-    public String getProxyid() {
-        return proxyid;
+    public String getPrivkey() {
+        return privkey;
     }
 
-    public void setProxyid(String proxyid) {
-        this.proxyid = proxyid;
+    public void setPrivkey(String privkey) {
+        this.privkey = privkey;
     }
-    
-        
-}//EoC
+
+}

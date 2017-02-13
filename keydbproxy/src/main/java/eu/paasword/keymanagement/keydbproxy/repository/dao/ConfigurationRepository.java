@@ -15,7 +15,8 @@
  */
 package eu.paasword.keymanagement.keydbproxy.repository.dao;
 
-import eu.paasword.keymanagement.keydbproxy.repository.domain.Proxyconfig;
+import eu.paasword.keymanagement.keydbproxy.repository.domain.ProxyConfiguration;
+import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Transactional
-public interface ConfigurationRepository extends JpaRepository<Proxyconfig, Long>{
+public interface ConfigurationRepository extends JpaRepository<ProxyConfiguration, Long>{
     
+    List<ProxyConfiguration> findByProxyid(String proxyid);
+
 }
