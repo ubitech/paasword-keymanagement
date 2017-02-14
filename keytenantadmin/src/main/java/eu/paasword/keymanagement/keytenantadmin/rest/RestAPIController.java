@@ -16,6 +16,7 @@
 package eu.paasword.keymanagement.keytenantadmin.rest;
 
 import eu.paasword.keymanagement.keytenantadmin.repository.service.TenantKeyManagementService;
+import eu.paasword.keymanagement.util.transfer.AppRegistration;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
 import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
 import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
@@ -56,10 +57,21 @@ public class RestAPIController {
     }//EoM       
 
     @RequestMapping(value = "/registerproxy", method = RequestMethod.POST)
-    public RestResponse registerproxy(@RequestBody ProxyRegistration proxiregistration) {
+    public RestResponse registerproxy(@RequestBody ProxyRegistration proxyregistration) {
         try {
             logger.info("Rest registerproxy");
-            return new RestResponse(ResponseCode.SUCCESS.name(), "Proxy registered successfully", tkm.registerProxy(proxiregistration));
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Proxy registered successfully", tkm.registerProxy(proxyregistration));
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM    
+    
+    @RequestMapping(value = "/registerapp", method = RequestMethod.POST)
+    public RestResponse registerapp(@RequestBody AppRegistration appregistration) {
+        try {
+            logger.info("Rest registerproxy");
+            return new RestResponse(ResponseCode.SUCCESS.name(), "App registered successfully", tkm.registerApplication(appregistration));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());

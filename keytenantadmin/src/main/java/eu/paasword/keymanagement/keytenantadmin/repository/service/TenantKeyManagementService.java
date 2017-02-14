@@ -19,20 +19,18 @@ import eu.paasword.keymanagement.keytenantadmin.repository.dao.AuthorizedProxyRe
 import eu.paasword.keymanagement.keytenantadmin.repository.dao.TenantconfigRepository;
 import eu.paasword.keymanagement.keytenantadmin.repository.dao.UserEntryRepository;
 import eu.paasword.keymanagement.keytenantadmin.repository.domain.Authorizedproxy;
-import eu.paasword.keymanagement.keytenantadmin.repository.domain.Tenantconfig;
 import eu.paasword.keymanagement.keytenantadmin.repository.domain.Userentry;
-import eu.paasword.keymanagement.keytenantadmin.repository.service.exception.DBProxyNotAuthorizedException;
 import eu.paasword.keymanagement.model.AppKey;
 import eu.paasword.keymanagement.model.ProxyKey;
 import eu.paasword.keymanagement.util.security.SecurityUtil;
 import eu.paasword.keymanagement.util.security.SeparatedKeyContainer;
+import eu.paasword.keymanagement.util.transfer.AppRegistration;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
-
 import eu.paasword.keymanagement.util.transfer.AppUserKey;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
 import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
@@ -72,9 +70,7 @@ public class TenantKeyManagementService {
     String paaswordAppURL;
 
     public String getUserKey(String userid) {
-
         return userentryrepo.findByUserid(userid).getUserkey();
-
     }//EoM
 
     public String createKeysForUser(String dbproxyid, String userid) throws UnsupportedEncodingException, Exception {
@@ -140,18 +136,45 @@ public class TenantKeyManagementService {
         return proxykeys;
     }//EoM
 
-    public String registerProxy(ProxyRegistration proxiregistration) {
-        if (authrepo.findByProxyid(proxiregistration.getProxyid()).isEmpty()) {
+    public String registerProxy(ProxyRegistration proxyregistration) {
+        if (authrepo.findByProxyid(proxyregistration.getProxyid()).isEmpty()) {
+            logger.info("Not existing proxy! I will register for the first time");
             Authorizedproxy authentry = new Authorizedproxy();
-            authentry.setProxyid(proxiregistration.getProxyid());
-            authentry.setPubkeyofproxy(proxiregistration.getPublickey());
+            authentry.setProxyid(proxyregistration.getProxyid());
+            authentry.setPubkeyofproxy(proxyregistration.getPublickey());
+            authentry.setProxyurl(proxyregistration.getProxyurl());
             authrepo.save(authentry);
         } else {
-
+            logger.info("Proxy already registered. I will replace it");
+            Authorizedproxy authentry = authrepo.findByProxyid(proxyregistration.getProxyid()).get(0);
+            authentry.setProxyid(proxyregistration.getProxyid());
+            authentry.setPubkeyofproxy(proxyregistration.getPublickey());
+            authentry.setProxyurl(proxyregistration.getProxyurl());
+            authrepo.save(authentry);
         }
         return "ok";
     }//EoM
 
+    public String registerApplication(AppRegistration appregistration) {
+        if (authrepo.findByProxyid(appregistration.getProxyid()).isEmpty()) {
+            logger.info("Not existing proxy! I will register for the first time");
+            Authorizedproxy authentry = new Authorizedproxy();
+            authentry.setProxyid(appregistration.getProxyid());
+            authentry.setPubkeyofapp(appregistration.getPublickey());
+            authentry.setAppurl(appregistration.getAppurl());
+            authrepo.save(authentry);
+        } else {
+            logger.info("Proxy already registered. I will replace it");
+            Authorizedproxy authentry = authrepo.findByProxyid(appregistration.getProxyid()).get(0);
+            authentry.setProxyid(appregistration.getProxyid());
+            authentry.setPubkeyofapp(appregistration.getPublickey());
+            authentry.setAppurl(appregistration.getAppurl());
+            authrepo.save(authentry);
+        }
+        return "ok";
+    }//EoM    
+    
+    
     public String registerSymmetricEnrcyptionKey(EncryptedAndSignedSecretKey encryptedkeyandsignature) {
         try {
             String proxyid = encryptedkeyandsignature.getProxyid();

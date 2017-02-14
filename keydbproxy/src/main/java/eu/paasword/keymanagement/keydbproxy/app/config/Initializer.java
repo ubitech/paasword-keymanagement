@@ -17,7 +17,6 @@ package eu.paasword.keymanagement.keydbproxy.app.config;
 
 import eu.paasword.keymanagement.keydbproxy.repository.domain.ProxyConfiguration;
 import eu.paasword.keymanagement.util.security.SecurityUtil;
-import eu.paasword.keymanagement.util.transfer.ResponseCode;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyPair;
@@ -41,7 +40,6 @@ import eu.paasword.keymanagement.keydbproxy.repository.dao.DbentryRepository;
 import eu.paasword.keymanagement.keydbproxy.repository.domain.Dbentry;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
 import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
-import java.util.List;
 
 /**
  *
@@ -57,6 +55,9 @@ public class Initializer {
 
     @Value("${tenantadmin.url}")
     private String tenantadminurl;
+    
+    @Value("${proxy.url}")
+    private String proxyurl;
 
     @Autowired
     ConfigurationRepository configrepo;
@@ -120,7 +121,7 @@ public class Initializer {
             try {
                 
                 RestTemplate restTemplate = new RestTemplate();
-                ProxyRegistration proxiregistration = new ProxyRegistration(dbproxyid, configrepo.findAll().get(0).getPubkey());
+                ProxyRegistration proxiregistration = new ProxyRegistration(dbproxyid, configrepo.findAll().get(0).getPubkey(), proxyurl);
                 String invocationurl = tenantadminurl + "/api/keytenantadmin/registerproxy";
                 RestResponse result = restTemplate.postForObject(invocationurl, proxiregistration, RestResponse.class);
                 

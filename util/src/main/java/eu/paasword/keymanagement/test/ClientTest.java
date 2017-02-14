@@ -33,10 +33,6 @@ public class ClientTest {
             pubKeyOfProxy = result.getReturnobject().toString();
 
             //Step 2 Register Proxy to TenantManager
-            invocationurl = proxyURL + "/api/keydbproxy/registerproxy" ;
-            ProxyRegistration proxy = new ProxyRegistration(proxyID, pubKeyOfProxy);
-            result = restTemplate.postForObject(invocationurl, proxy, RestResponse.class);
-            logger.info("Tenant configured for Proxy: "+proxyID );            
             
 //            // Step 2: Get User Key from Tenant Admin
 //            invocationurl = tenantAdmin + "/api/keytenantadmin/getuserkey/" + userID;

@@ -19,18 +19,18 @@ package eu.paasword.keymanagement.util.transfer;
  *
  * @author Panagiotis Gouvas (pgouvas@ubitech.eu)
  */
-public class ProxyRegistration {
+public class AppRegistration {
     private String proxyid;
     private String publickey;
-    private String proxyurl;
+    private String appurl;
 
-    public ProxyRegistration() {
+    public AppRegistration() {
     }    
     
-    public ProxyRegistration(String proxyid, String publickey, String proxyurl) {
+    public AppRegistration(String proxyid, String publickey, String appurl) {
         this.proxyid = proxyid;
         this.publickey = publickey;
-        this.proxyurl = proxyurl;
+        this.appurl = appurl;
     }    
     
     public String getProxyid() {
@@ -49,12 +49,12 @@ public class ProxyRegistration {
         this.publickey = publickey;
     }
 
-    public String getProxyurl() {
-        return proxyurl;
+    public String getAppurl() {
+        return appurl;
     }
 
-    public void setProxyurl(String proxyurl) {
-        this.proxyurl = proxyurl;
+    public void setAppurl(String appurl) {
+        this.appurl = appurl;
     }
     
 }
