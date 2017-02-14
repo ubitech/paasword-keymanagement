@@ -23,6 +23,9 @@ public class ProxyRegistration {
     private String proxyid;
     private String publickey;
 
+    public ProxyRegistration() {
+    }    
+    
     public ProxyRegistration(String proxyid, String publickey) {
         this.proxyid = proxyid;
         this.publickey = publickey;

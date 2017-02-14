@@ -26,7 +26,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
 /**
@@ -56,6 +55,9 @@ public class ProxyConfiguration implements Serializable {
     @Column(name = "privkey")
     private String privkey;
 
+    @Column(name = "pubsynched", columnDefinition = "tinyint(1) default 0")
+    private Integer pubsynched;    
+    
     @Basic(optional = false)
     @NotNull    
     @Column(name = "proxyid")
@@ -115,5 +117,13 @@ public class ProxyConfiguration implements Serializable {
     public void setAessynched(Integer aessynched) {
         this.aessynched = aessynched;
     }    
+
+    public Integer getPubsynched() {
+        return pubsynched;
+    }
+
+    public void setPubsynched(Integer pubsynched) {
+        this.pubsynched = pubsynched;
+    }       
     
-}
+}//EoC

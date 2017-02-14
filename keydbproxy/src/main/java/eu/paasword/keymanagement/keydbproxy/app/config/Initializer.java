@@ -40,6 +40,7 @@ import eu.paasword.keymanagement.keydbproxy.repository.dao.ConfigurationReposito
 import eu.paasword.keymanagement.keydbproxy.repository.dao.DbentryRepository;
 import eu.paasword.keymanagement.keydbproxy.repository.domain.Dbentry;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
+import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
 import java.util.List;
 
 /**
@@ -65,10 +66,10 @@ public class Initializer {
 
     @Bean
     @Order(1)
-    public ProxyConfiguration chechRSAKeyPair() {
+    public ProxyConfiguration createRSAKeyPair() {
         logger.info("Checking RSA for " + dbproxyid);
         ProxyConfiguration proxyconfig = null;
-        if (configrepo.findAll().isEmpty()) {
+        if (configrepo.findAll().isEmpty() || configrepo.findAll().get(0).getPubkey() == null) {
             try {
                 logger.info("Generating key pair");
                 KeyPair keypair = SecurityUtil.generateRSAKeyPair(2048);
@@ -78,6 +79,8 @@ public class Initializer {
                 logger.info("keypair.getPublic().getClass " + keypair.getPublic().getClass());
                 logger.info("keypair.getPrivate().getClass " + keypair.getPrivate().getClass());
                 proxyconfig.setProxyid(dbproxyid);
+                proxyconfig.setAessynched(0);
+                proxyconfig.setPubsynched(0);
                 configrepo.save(proxyconfig);
 
             } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
@@ -104,13 +107,37 @@ public class Initializer {
             } catch (UnsupportedEncodingException ex) {
                 Logger.getLogger(Initializer.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         }
         return proxyconfig;
     }//EoM
 
     @Bean
     @Order(2)
+    public String transmitPublicKey() {
+        logger.info("Transmit public key for " + dbproxyid);
+        
+        if (configrepo.findAll().get(0) != null &&  configrepo.findAll().get(0).getPubsynched() != 1 ) {
+            try {
+                
+                RestTemplate restTemplate = new RestTemplate();
+                ProxyRegistration proxiregistration = new ProxyRegistration(dbproxyid, configrepo.findAll().get(0).getPubkey());
+                String invocationurl = tenantadminurl + "/api/keytenantadmin/registerproxy";
+                RestResponse result = restTemplate.postForObject(invocationurl, proxiregistration, RestResponse.class);
+                
+                //update database
+                ProxyConfiguration proxyconfig = configrepo.findAll().get(0);
+                proxyconfig.setPubsynched(1);
+                configrepo.save(proxyconfig);
+                
+            } catch (Exception ex) {
+                Logger.getLogger(Initializer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return "ok";
+    }//EoM    
+
+    @Bean
+    @Order(3)
     public String generateSymmetricEncryptionKeyAndEncryptDB() {
         ProxyConfiguration proxyconfig = configrepo.findByProxyid(dbproxyid).get(0);
 
@@ -124,6 +151,8 @@ public class Initializer {
                 String secretkeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(aeskey).getBytes("UTF-8"));
                 //Store
                 proxyconfig.setSecretkey(secretkeyasstring);
+                //
+                dbrepo.deleteAll();
                 //Encrypt
                 for (int i = 1; i < 10; i++) {
                     Dbentry dbentry = new Dbentry();
@@ -131,6 +160,7 @@ public class Initializer {
                     dbentry.setValue(Base64.getEncoder().encodeToString(SecurityUtil.encryptSymmetrically(aeskey, "value" + i)));
                     dbrepo.save(dbentry);
                 }//for
+                
                 //Self-check that encryption is working
                 Dbentry entry = dbrepo.findByKey("key1").get(0);
                 //decrypt-process of stored value
@@ -151,7 +181,7 @@ public class Initializer {
     }//EoM  
 
     @Bean
-    @Order(3)
+    @Order(4)
     public String transmitSymmetricEncryptionKeyToTenant() {
         try {
             ProxyConfiguration proxyconfig = configrepo.findByProxyid(dbproxyid).get(0);
