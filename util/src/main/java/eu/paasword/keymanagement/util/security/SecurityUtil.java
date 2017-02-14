@@ -88,11 +88,11 @@ public class SecurityUtil {
         return new String(bytePlainText);
     }//EoM
 
-    public static KeyPair generateRSAKeyPair() throws NoSuchAlgorithmException {
+    public static KeyPair generateRSAKeyPair(int bitsize) throws NoSuchAlgorithmException {   //1024 2048
         KeyPair keypair = null;
         try {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-            kpg.initialize(1024);       //TODO alter hardcoded parameter
+            kpg.initialize(bitsize);       //TODO alter hardcoded parameter
             keypair = kpg.genKeyPair();
             //logger.info("public: " + keypair.getPublic());
             //logger.info("private: " + keypair.getPrivate());

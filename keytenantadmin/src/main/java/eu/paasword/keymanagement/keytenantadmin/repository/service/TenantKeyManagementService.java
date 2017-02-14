@@ -16,8 +16,10 @@
 package eu.paasword.keymanagement.keytenantadmin.repository.service;
 
 import eu.paasword.keymanagement.keytenantadmin.repository.dao.AuthorizedProxyRepository;
+import eu.paasword.keymanagement.keytenantadmin.repository.dao.TenantconfigRepository;
 import eu.paasword.keymanagement.keytenantadmin.repository.dao.UserEntryRepository;
 import eu.paasword.keymanagement.keytenantadmin.repository.domain.Authorizedproxy;
+import eu.paasword.keymanagement.keytenantadmin.repository.domain.Tenantconfig;
 import eu.paasword.keymanagement.keytenantadmin.repository.domain.Userentry;
 import eu.paasword.keymanagement.keytenantadmin.repository.service.exception.DBProxyNotAuthorizedException;
 import eu.paasword.keymanagement.model.AppKey;
@@ -32,13 +34,19 @@ import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 
 import eu.paasword.keymanagement.util.transfer.AppUserKey;
+import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
 import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
 import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
+import eu.paasword.keymanagement.util.transfer.ResponseCode;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.logging.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import sun.security.rsa.RSAPrivateCrtKeyImpl;
 import sun.security.rsa.RSAPublicKeyImpl;
 
 /**
@@ -54,6 +62,8 @@ public class TenantKeyManagementService {
     AuthorizedProxyRepository authrepo;
     @Autowired
     UserEntryRepository userentryrepo;
+    @Autowired
+    TenantconfigRepository configrepo;
 
     @Value("${proxy.url}")
     String proxyURL;
@@ -66,7 +76,6 @@ public class TenantKeyManagementService {
         return userentryrepo.findByUserid(userid).getUserkey();
 
     }//EoM
-
 
     public String createKeysForUser(String dbproxyid, String userid) throws UnsupportedEncodingException, Exception {
         String tenantkey = authrepo.findByProxyid(dbproxyid).get(0).getSecretkey(); //by default only one is accepted
@@ -100,23 +109,16 @@ public class TenantKeyManagementService {
         try {
             String invocationurl = proxyURL + "/api/keydbproxy/registeruser";
 //            logger.info("Invodation url: " + invocationurl);
-
             ProxyUserKey proxyUserKey = new ProxyUserKey(userid, dbproxyid, proxykeyasstring);
-
             result = restTemplate.postForObject(invocationurl, proxyUserKey, RestResponse.class);
-
             invocationurl = paaswordAppURL + "/api/paaswordapp/registeruser";
 //            logger.info("Invodation url: " + invocationurl);
-
             AppUserKey appUserKey = new AppUserKey(userid, dbproxyid, appkeyasstring);
-
             result = restTemplate.postForObject(invocationurl, appUserKey, RestResponse.class);
-
         } catch (Exception ex) {
             ex.printStackTrace();
             logger.severe("Exception during the invocation of register key to proxy");
         }
-
         return "ok";
     }//EoM
 
@@ -139,16 +141,62 @@ public class TenantKeyManagementService {
     }//EoM
 
     public String registerProxy(ProxyRegistration proxiregistration) {
-        if ( authrepo.findByProxyid(proxiregistration.getProxyid()).isEmpty() ){
+        if (authrepo.findByProxyid(proxiregistration.getProxyid()).isEmpty()) {
             Authorizedproxy authentry = new Authorizedproxy();
             authentry.setProxyid(proxiregistration.getProxyid());
             authentry.setPubkeyofproxy(proxiregistration.getPublickey());
-            authrepo.save(authentry);            
+            authrepo.save(authentry);
         } else {
-            
-        }
 
+        }
         return "ok";
     }//EoM
-    
+
+    public String registerSymmetricEnrcyptionKey(EncryptedAndSignedSecretKey encryptedkeyandsignature) {
+        try {
+            String proxyid = encryptedkeyandsignature.getProxyid();
+            byte[] asymencryptedkey = encryptedkeyandsignature.getAsymencryptedkey();
+            byte[] signature = encryptedkeyandsignature.getSignature();
+            //Step 1 - Decrypt the private key
+            //fetch my Private Key
+            String privkeyasstring = configrepo.findAll().get(0).getPrivkey();
+            byte[] base64decodedBytes = Base64.getDecoder().decode(privkeyasstring);
+            PrivateKey privkey = SecurityUtil.deSerializeObject(new String(base64decodedBytes, "utf-8"), RSAPrivateCrtKeyImpl.class);
+            //decrypt the aes key
+            String asymdecryptedkeyasstring = SecurityUtil.decryptAssymetrically(privkey, asymencryptedkey);
+            //cast it to verify that it is a valid key
+            byte[] base64decodedBytes2 = Base64.getDecoder().decode(asymdecryptedkeyasstring);
+            SecretKey aeskey = SecurityUtil.deSerializeObject(new String(base64decodedBytes2, "utf-8"), SecretKey.class);
+            String testmsg = "test input";
+            byte[] symencrypted = SecurityUtil.encryptSymmetrically(aeskey, testmsg);
+            String symdecrypted = SecurityUtil.decryptSymmetrically(aeskey, symencrypted);
+            if (symdecrypted.equalsIgnoreCase(testmsg)) {
+                logger.info("Secret key was decrypted and casted");
+            }
+            //Step 2 - Verify the Secret Key Signature  by consulting the trust list
+            String pubkeyofproxyasstring = authrepo.findByProxyid(proxyid).get(0).getPubkeyofproxy();
+            byte[] base64decodedBytes3 = Base64.getDecoder().decode(pubkeyofproxyasstring);
+            PublicKey pubkeyofproxy = SecurityUtil.deSerializeObject(new String(base64decodedBytes3, "utf-8"), RSAPublicKeyImpl.class);
+            //create claim data
+            String secretkeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(aeskey).getBytes("UTF-8"));
+            boolean verify = SecurityUtil.verifySignature(pubkeyofproxy, secretkeyasstring, signature);
+            logger.info("Signature has been verified: " + verify);
+            //save key
+            Authorizedproxy authorizedproxy = authrepo.findByProxyid(proxyid).get(0);
+            authorizedproxy.setSecretkey(secretkeyasstring);
+            authrepo.save(authorizedproxy);
+        } //EoM
+        catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(TenantKeyManagementService.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(TenantKeyManagementService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return ResponseCode.SUCCESS.toString();
+    }//EoM
+
+    public String getPubKey() {
+        String pubkey = configrepo.findAll().get(0).getPubkey();   //configrepo.findAll().isEmpty()?:"":  TODO
+        return pubkey;
+    }
+
 }//EoC

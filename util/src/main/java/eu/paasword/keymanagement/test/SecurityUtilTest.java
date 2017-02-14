@@ -31,6 +31,7 @@ public class SecurityUtilTest {
 
     public static void main(String[] args) throws Exception {
         String unencrypted = "This is a test";
+//        String unencrypted = "wqzDrQAFc3IAH2phdmF4LmNyeXB0by5zcGVjLlNlY3JldEtleVNwZWNbRwtmw6IwYU0CAAJMAAlhbGdvcml0aG10ABJMamF2YS9sYW5nL1N0cmluZztbAANrZXl0AAJbQnhwdAADQUVTdXIAAltCwqzDsxfDuAYIVMOgAgAAeHAAAAAQVhhOcGrChcKBb8KBPsKvEsK3bMOxbQ==";
 
         //Symmetric Encryption & Decryption
         SecretKey aeskey = SecurityUtil.generateAESKey();
@@ -42,7 +43,7 @@ public class SecurityUtilTest {
         logger.info(" unencrypted: " + unencrypted + " encrypted: " + symencrypted + " decrypted: " + symdecrypted);
 
         //Signature Creation & Verification Circle
-        KeyPair pair = SecurityUtil.generateRSAKeyPair();
+        KeyPair pair = SecurityUtil.generateRSAKeyPair(2048);
         String content = "this is a message to be signed";
         byte[] signature = SecurityUtil.signContent(content, pair.getPrivate());
         logger.info("signature: " + signature); //1o part tou QR
@@ -63,6 +64,11 @@ public class SecurityUtilTest {
         String symdecrypted2 = SecurityUtil.decryptSymmetrically(merged, symencrypted2);
         logger.info(" unencrypted: " + unencrypted + " encrypted: " + symencrypted2 + " decrypted: " + symdecrypted2);
 
+        
+        
+        
+        
+        
     }//EoM
 
 }//EoC

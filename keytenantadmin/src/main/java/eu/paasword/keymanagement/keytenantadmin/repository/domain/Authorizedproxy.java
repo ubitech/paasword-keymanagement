@@ -55,6 +55,7 @@ public class Authorizedproxy implements Serializable {
     private String pubkeyofproxy;
 
     @Basic(optional = true)
+    @Size(min = 1, max = 10024)    
     @Column(name = "secretkey")
     private String secretkey;
     

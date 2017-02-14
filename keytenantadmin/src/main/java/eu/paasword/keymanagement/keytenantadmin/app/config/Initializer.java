@@ -27,7 +27,6 @@ import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -55,7 +54,7 @@ public class Initializer {
         if (configrepo.findAll().isEmpty()) {
             try {
                 logger.info("Generating key pair");
-                KeyPair keypair = SecurityUtil.generateRSAKeyPair();
+                KeyPair keypair = SecurityUtil.generateRSAKeyPair(2048);
                 config = new Tenantconfig();
                 config.setPubkey(Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(keypair.getPublic()).getBytes("UTF-8")));
                 config.setPrivkey(Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(keypair.getPrivate()).getBytes("UTF-8")));

@@ -16,6 +16,7 @@
 package eu.paasword.keymanagement.keytenantadmin.rest;
 
 import eu.paasword.keymanagement.keytenantadmin.repository.service.TenantKeyManagementService;
+import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
 import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
 import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
 import eu.paasword.keymanagement.util.transfer.ResponseCode;
@@ -42,40 +43,50 @@ public class RestAPIController {
     @Autowired
     TenantKeyManagementService tkm;
 
-    
-    @RequestMapping(value = "/registerproxy", method = RequestMethod.POST)
-    public RestResponse registeruser(@RequestBody ProxyRegistration proxiregistration) {
+    @RequestMapping(value = "/getpubkey", method = RequestMethod.GET)
+    public RestResponse getpubkey() {
         try {
-            logger.info("Rest for registering proxyid and key to the database");
+            logger.info("Rest getpubkey");
 
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Proxy registered successfully", tkm.getPubKey());
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM       
+
+    @RequestMapping(value = "/registerproxy", method = RequestMethod.POST)
+    public RestResponse registerproxy(@RequestBody ProxyRegistration proxiregistration) {
+        try {
+            logger.info("Rest registerproxy");
             return new RestResponse(ResponseCode.SUCCESS.name(), "Proxy registered successfully", tkm.registerProxy(proxiregistration));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
     }//EoM    
-    
-//    /*
-//    *  This is the entry point of the Key Management Process since a proxy will 
-//    *  ask the tenant to create a new key. The proxyid should be pre-authorized
-//    */
-//    @RequestMapping(value = "/createsek/{dbproxyid}", method = RequestMethod.GET)
-//    public RestResponse createsymmetricencryptionkey(@PathVariable("dbproxyid") String dbproxyid) {
-//        try {
-//            return new RestResponse(ResponseCode.SUCCESS.name(), "Key created", tkm.generateSymmetricEnrcyptionKey(dbproxyid));
-//        } catch (Exception ex) {
-//            logger.severe(ex.getMessage());
-//            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
-//        }
-//    }//EoM       
+
+    /*
+    *  This is the entry point of the Key Management Process since a proxy will 
+    *  ask the tenant to create a new key. The proxyid should be pre-authorized
+     */
+    @RequestMapping(value = "/registersek/{dbproxyid}", method = RequestMethod.POST)
+    public RestResponse registersek(@PathVariable("dbproxyid") String dbproxyid, @RequestBody EncryptedAndSignedSecretKey encryptedkeyandsignature) {
+        try {
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Key created", tkm.registerSymmetricEnrcyptionKey(encryptedkeyandsignature));
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM       
 
     /*
     *  This method
-    */
+     */
     @RequestMapping(value = "/registeruser/{dbproxyid}/{userid}", method = RequestMethod.GET)
-    public RestResponse registeruser( @PathVariable("dbproxyid") String dbproxyid , @PathVariable("userid") String userid ) {
+    public RestResponse registeruser(@PathVariable("dbproxyid") String dbproxyid, @PathVariable("userid") String userid) {
         try {
-            return new RestResponse(ResponseCode.SUCCESS.name(), "User was successfully added", tkm.createKeysForUser(dbproxyid, userid) );
+            return new RestResponse(ResponseCode.SUCCESS.name(), "User was successfully added", tkm.createKeysForUser(dbproxyid, userid));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
@@ -84,7 +95,7 @@ public class RestAPIController {
 
     /*
     *  This method
-    */
+     */
     @RequestMapping(value = "/getuserkey/{userid}", method = RequestMethod.GET)
     public RestResponse getuserkey(@PathVariable("userid") String userid) {
         try {
@@ -94,38 +105,37 @@ public class RestAPIController {
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
     }//EoM
-    
+
     /*
     *  This method
-    */
+     */
     @RequestMapping(value = "/getappkeys/{dbproxyid}", method = RequestMethod.GET)
-    public RestResponse getappkeys( @PathVariable("dbproxyid") String dbproxyid ) {
+    public RestResponse getappkeys(@PathVariable("dbproxyid") String dbproxyid) {
         try {
-            return new RestResponse(ResponseCode.SUCCESS.name(), "List successfully added", tkm.getappkeys(dbproxyid) );
+            return new RestResponse(ResponseCode.SUCCESS.name(), "List successfully added", tkm.getappkeys(dbproxyid));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
     }//EoM      
-    
+
     /*
     *  This method
-    */
+     */
     @RequestMapping(value = "/getproxykeys/{dbproxyid}", method = RequestMethod.GET)
-    public RestResponse getproxykeys( @PathVariable("dbproxyid") String dbproxyid ) {
+    public RestResponse getproxykeys(@PathVariable("dbproxyid") String dbproxyid) {
         try {
-            return new RestResponse(ResponseCode.SUCCESS.name(), "List successfully added", tkm.getproxykeys(dbproxyid) );
+            return new RestResponse(ResponseCode.SUCCESS.name(), "List successfully added", tkm.getproxykeys(dbproxyid));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
         }
     }//EoM      
-    
-    
+
     @RequestMapping(method = RequestMethod.GET)
     public String test() {
         logger.info("Rest Request");
         return "echo";
-    }    
-    
+    }
+
 }//EoC

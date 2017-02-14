@@ -15,6 +15,7 @@
  */
 package eu.paasword.keymanagement.keydbproxy.repository.domain;
 
+
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -25,6 +26,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
 /**
@@ -59,10 +61,13 @@ public class ProxyConfiguration implements Serializable {
     @Column(name = "proxyid")
     private String proxyid;
     
-    @Basic(optional = false)
-    @Column(name = "secretkey")
+    @Column(name = "secretkey", nullable = true)
+    @Size(min = 1, max = 10024)    
     private String secretkey;
 
+    @Column(name = "aessynched", columnDefinition = "tinyint(1) default 0")
+    private Integer aessynched;
+    
     public Long getId() {
         return id;
     }
@@ -103,4 +108,12 @@ public class ProxyConfiguration implements Serializable {
         this.secretkey = secretkey;
     }
 
+    public Integer getAessynched() {
+        return aessynched;
+    }
+
+    public void setAessynched(Integer aessynched) {
+        this.aessynched = aessynched;
+    }    
+    
 }
