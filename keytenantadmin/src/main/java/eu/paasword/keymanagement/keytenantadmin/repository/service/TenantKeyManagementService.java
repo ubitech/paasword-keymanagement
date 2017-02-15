@@ -31,11 +31,9 @@ import java.util.Base64;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
-import eu.paasword.keymanagement.util.transfer.AppUserKey;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedUserKeys;
 import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
-import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
 import eu.paasword.keymanagement.util.transfer.ResponseCode;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
 import java.security.PrivateKey;
@@ -70,8 +68,8 @@ public class TenantKeyManagementService {
     @Value("${paaswordapp.url}")
     String paaswordAppURL;
 
-    public String getUserKey(String userid) {
-        return userentryrepo.findByUserid(userid).getUserkey();
+    public String getUserKey(String dbproxyid, String userid) {
+        return userentryrepo.findByProxyidAndUserid(dbproxyid,userid).get(0).getUserkey();
     }//EoM
 
     public String createKeysForUser(String dbproxyid, String userid) throws UnsupportedEncodingException, Exception {

@@ -18,7 +18,6 @@ package eu.paasword.keymanagement.paaswordapp.rest;
 import eu.paasword.keymanagement.paaswordapp.repository.dao.AppconfigRepository;
 import java.util.Optional;
 import java.util.logging.Logger;
-
 import eu.paasword.keymanagement.paaswordapp.repository.service.PaaSwordService;
 import eu.paasword.keymanagement.util.transfer.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,7 @@ public class RestAPIController {
     }//EoM
 
     @RequestMapping(value = "/query", method = RequestMethod.POST)
-    public RestResponse query(@RequestBody ClientQueryContext clientQueryContext) {
+    public RestResponse query(@RequestBody QueryContext clientQueryContext) {
         try {
             logger.info("Querying DB Proxy for " + clientQueryContext.getQuery());
 

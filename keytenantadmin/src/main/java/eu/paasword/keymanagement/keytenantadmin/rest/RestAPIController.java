@@ -107,10 +107,10 @@ public class RestAPIController {
     /*
     *  This method
      */
-    @RequestMapping(value = "/getuserkey/{userid}", method = RequestMethod.GET)
-    public RestResponse getuserkey(@PathVariable("userid") String userid) {
+    @RequestMapping(value = "/getuserkey/{dbproxyid}/{userid}", method = RequestMethod.GET)
+    public RestResponse getuserkey(@PathVariable("dbproxyid") String dbproxyid,@PathVariable("userid") String userid) {
         try {
-            return new RestResponse(ResponseCode.SUCCESS.name(), "User key successfully fetched", tkm.getUserKey(userid));
+            return new RestResponse(ResponseCode.SUCCESS.name(), "User key successfully fetched", tkm.getUserKey(dbproxyid,userid));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());

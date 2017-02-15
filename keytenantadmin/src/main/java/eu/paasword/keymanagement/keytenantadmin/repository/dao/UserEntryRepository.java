@@ -16,6 +16,7 @@
 package eu.paasword.keymanagement.keytenantadmin.repository.dao;
 
 import eu.paasword.keymanagement.keytenantadmin.repository.domain.Userentry;
+import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -27,7 +28,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Transactional
 public interface UserEntryRepository extends JpaRepository<Userentry, Long>{
-
-    Userentry findByUserid(String userid);
-    
+    List<Userentry> findByUserid(String userid);
+    List<Userentry> findByProxyidAndUserid(String proxyid, String userid);    
 }

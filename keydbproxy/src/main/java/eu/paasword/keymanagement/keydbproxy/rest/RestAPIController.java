@@ -18,7 +18,6 @@ package eu.paasword.keymanagement.keydbproxy.rest;
 import eu.paasword.keymanagement.keydbproxy.repository.dao.ConfigurationRepository;
 import eu.paasword.keymanagement.keydbproxy.repository.service.DBProxyService;
 import eu.paasword.keymanagement.util.transfer.*;
-
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +52,10 @@ public class RestAPIController {
 
 
     @RequestMapping(value = "/registeruser", method = RequestMethod.POST)
-    public RestResponse registeruser(@RequestBody ProxyUserKey proxyUserKey) {
+    public RestResponse registeruser(@RequestBody EncryptedAndSignedUserKeys encryptedandsigneduserkeys) {
         try {
             logger.info("Rest register the proxy key for a user to the database");
-
-            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", dbproxy.registerUser(proxyUserKey));
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", dbproxy.registerUser(encryptedandsigneduserkeys));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
@@ -65,11 +63,10 @@ public class RestAPIController {
     }//EoM
 
     @RequestMapping(value = "/query", method = RequestMethod.POST)
-    public RestResponse query(@RequestBody AppQueryContext appQueryContext) {
+    public RestResponse query(@RequestBody QueryContext querycontext) {
         try {
-            logger.info("Querying DB Proxy for " + appQueryContext.getQuery());
-
-            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", dbproxy.queryHandler(appQueryContext));
+            logger.info("Querying DB Proxy for " + querycontext.getQuery());
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", dbproxy.queryHandler(querycontext));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
