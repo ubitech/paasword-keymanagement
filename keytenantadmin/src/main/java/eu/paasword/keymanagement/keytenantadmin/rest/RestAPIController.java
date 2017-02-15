@@ -19,7 +19,6 @@ import eu.paasword.keymanagement.keytenantadmin.repository.service.TenantKeyMana
 import eu.paasword.keymanagement.util.transfer.AppRegistration;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
 import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
-import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
 import eu.paasword.keymanagement.util.transfer.ResponseCode;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
 import java.util.Optional;

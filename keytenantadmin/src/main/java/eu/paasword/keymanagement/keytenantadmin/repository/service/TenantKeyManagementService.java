@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 import eu.paasword.keymanagement.util.transfer.AppUserKey;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
+import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedUserKeys;
 import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
 import eu.paasword.keymanagement.util.transfer.ProxyUserKey;
 import eu.paasword.keymanagement.util.transfer.ResponseCode;
@@ -99,22 +100,55 @@ public class TenantKeyManagementService {
         //---
         userentryrepo.save(userentry);
 
-        // Sending keys to proxy and app
-        RestTemplate restTemplate = new RestTemplate();
-        RestResponse result = null;
         try {
-            String invocationurl = proxyURL + "/api/keydbproxy/registeruser";
-//            logger.info("Invodation url: " + invocationurl);
-            ProxyUserKey proxyUserKey = new ProxyUserKey(userid, dbproxyid, proxykeyasstring);
-            result = restTemplate.postForObject(invocationurl, proxyUserKey, RestResponse.class);
-            invocationurl = paaswordAppURL + "/api/paaswordapp/registeruser";
-//            logger.info("Invodation url: " + invocationurl);
-            AppUserKey appUserKey = new AppUserKey(userid, dbproxyid, appkeyasstring);
-            result = restTemplate.postForObject(invocationurl, appUserKey, RestResponse.class);
+            Authorizedproxy authproxy = authrepo.findByProxyid(dbproxyid).get(0);
+            String proxyurl = authproxy.getProxyurl();
+            String appurl = authproxy.getAppurl();
+
+            //fetch PubKey of Proxy
+            RestTemplate restTemplate = new RestTemplate();
+            String invocationurl = proxyurl + "/api/keydbproxy/getpubkey/" + dbproxyid;
+            RestResponse result = restTemplate.getForObject(invocationurl, RestResponse.class);
+            logger.info("PubKey of Proxy Fetched: \n" + result.getReturnobject());
+            byte[] base64decodedBytes1 = Base64.getDecoder().decode((String) result.getReturnobject());
+            PublicKey pubkeyofproxy = SecurityUtil.deSerializeObject(new String(base64decodedBytes1, "utf-8"), RSAPublicKeyImpl.class);
+            logger.info("Public Key of Proxy has been reconstructed");
+
+            invocationurl = appurl + "/api/paaswordapp/getpubkey/" + dbproxyid;
+            result = restTemplate.getForObject(invocationurl, RestResponse.class);
+            logger.info("PubKey of App Fetched: \n" + result.getReturnobject());
+            byte[] base64decodedBytes2 = Base64.getDecoder().decode((String) result.getReturnobject());
+            PublicKey pubkeyofapp = SecurityUtil.deSerializeObject(new String(base64decodedBytes2, "utf-8"), RSAPublicKeyImpl.class);
+            logger.info("Public Key of App has been reconstructed");
+
+            //Encrypt assymetrically appkey & proxy
+            byte[] asymencryptedappkey = SecurityUtil.encryptAssymetrically(pubkeyofapp, appkeyasstring);
+            byte[] asymencryptedproxykey = SecurityUtil.encryptAssymetrically(pubkeyofproxy, proxykeyasstring);
+
+            EncryptedAndSignedUserKeys encryptedAndSignedUserKeys = new EncryptedAndSignedUserKeys(dbproxyid, userid, asymencryptedproxykey, asymencryptedappkey, null, null);
+            invocationurl = appurl + "/api/paaswordapp/registeruser";
+            result = restTemplate.postForObject(invocationurl, encryptedAndSignedUserKeys, RestResponse.class);
+            logger.info("Registeruser result: \n" + result.getReturnobject());
+
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.severe("Exception during the invocation of register key to proxy");
+            logger.severe("Exception during the transmition of the keys");
         }
+
+        // Sending keys to proxy and app
+        //------ Old implementation
+//        RestTemplate restTemplate = new RestTemplate();
+//        RestResponse result = null;
+//        try {
+//            String invocationurl = proxyURL + "/api/keydbproxy/registeruser";
+//            ProxyUserKey proxyUserKey = new ProxyUserKey(userid, dbproxyid, proxykeyasstring);
+//            result = restTemplate.postForObject(invocationurl, proxyUserKey, RestResponse.class);
+//            invocationurl = paaswordAppURL + "/api/paaswordapp/registeruser";
+//            AppUserKey appUserKey = new AppUserKey(userid, dbproxyid, appkeyasstring);
+//            result = restTemplate.postForObject(invocationurl, appUserKey, RestResponse.class);
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//            logger.severe("Exception during the invocation of register key to proxy");
+//        }
         return "ok";
     }//EoM
 
@@ -173,8 +207,7 @@ public class TenantKeyManagementService {
         }
         return "ok";
     }//EoM    
-    
-    
+
     public String registerSymmetricEnrcyptionKey(EncryptedAndSignedSecretKey encryptedkeyandsignature) {
         try {
             String proxyid = encryptedkeyandsignature.getProxyid();

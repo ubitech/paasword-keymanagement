@@ -40,17 +40,6 @@ public class RestAPIController {
     @Autowired
     ConfigurationRepository configurationRepository;
     
-    @RequestMapping(value = "/encryptdb", method = RequestMethod.GET)
-    public RestResponse encryptdb() {
-        try {
-            logger.info("Rest request to encrypt the database");
-            return new RestResponse(ResponseCode.SUCCESS.name(), "Database was configured", dbproxy.initializeDatabase() );
-        } catch (Exception ex) {
-            logger.severe(ex.getMessage());
-            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
-        }
-    }//EoM
-
     @RequestMapping(value = "/getpubkey/{proxyid}", method = RequestMethod.GET)
     public RestResponse getPublicKey(@PathVariable("proxyid") String proxyid) {
         try {

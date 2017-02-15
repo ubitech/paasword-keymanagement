@@ -15,12 +15,14 @@
  */
 package eu.paasword.keymanagement.paaswordapp.rest;
 
+import eu.paasword.keymanagement.paaswordapp.repository.dao.AppconfigRepository;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 import eu.paasword.keymanagement.paaswordapp.repository.service.PaaSwordService;
 import eu.paasword.keymanagement.util.transfer.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,19 +40,32 @@ public class RestAPIController {
 
     @Autowired
     PaaSwordService paaSwordService;
-
+    @Autowired
+    AppconfigRepository configurationRepository;
+    
     @RequestMapping(method = RequestMethod.GET)
     public String test() {
         logger.info("Rest Request");
         return "echo";
     }
 
+    @RequestMapping(value = "/getpubkey/{proxyid}", method = RequestMethod.GET)
+    public RestResponse getPublicKey(@PathVariable("proxyid") String proxyid) {
+        try {
+            logger.info("Rest request to get public key");
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Database was configured", configurationRepository.findAll().get(0).getPubkey());
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM    
+    
     @RequestMapping(value = "/registeruser", method = RequestMethod.POST)
-    public RestResponse registeruser(@RequestBody AppUserKey appUserKey) {
+    public RestResponse registeruser(@RequestBody EncryptedAndSignedUserKeys encryptedandsigneduserkeys) {
         try {
             logger.info("Rest register the app key for a user to the database");
 
-            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", paaSwordService.registerUser(appUserKey));
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", paaSwordService.registerUser(encryptedandsigneduserkeys));
         } catch (Exception ex) {
             logger.severe(ex.getMessage());
             return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
