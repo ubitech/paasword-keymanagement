@@ -22,37 +22,37 @@ import javax.crypto.SecretKey;
  * @author Panagiotis Gouvas (pgouvas@ubitech.eu)
  */
 public class SeparatedKeyContainer {
-    SecretKey userkey;
-    SecretKey appkey;
-    SecretKey proxykey;
+    PaaSwordSecurityKey userkey;
+    PaaSwordSecurityKey appkey;
+    PaaSwordSecurityKey proxykey;
 
-    public SeparatedKeyContainer(SecretKey userkey, SecretKey appkey, SecretKey proxykey) {
+    public SeparatedKeyContainer(PaaSwordSecurityKey userkey, PaaSwordSecurityKey appkey, PaaSwordSecurityKey proxykey) {
         this.userkey = userkey;
         this.appkey = appkey;
         this.proxykey = proxykey;
     }    
     
-    public SecretKey getUserkey() {
+    public PaaSwordSecurityKey getUserkey() {
         return userkey;
     }
 
-    public void setUserkey(SecretKey userkey) {
+    public void setUserkey(PaaSwordSecurityKey userkey) {
         this.userkey = userkey;
     }
 
-    public SecretKey getAppkey() {
+    public PaaSwordSecurityKey getAppkey() {
         return appkey;
     }
 
-    public void setAppkey(SecretKey appkey) {
+    public void setAppkey(PaaSwordSecurityKey appkey) {
         this.appkey = appkey;
     }
 
-    public SecretKey getProxykey() {
+    public PaaSwordSecurityKey getProxykey() {
         return proxykey;
     }
 
-    public void setProxykey(SecretKey proxykey) {
+    public void setProxykey(PaaSwordSecurityKey proxykey) {
         this.proxykey = proxykey;
     }       
     

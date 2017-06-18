@@ -133,7 +133,15 @@ public class DBProxyService {
             }
 
             logger.info("Merge User App and Proxy keys");
-            SecretKey merged = SecurityUtil.mergeKeysInParts(UserAESkey, AppAESkey, ProxyAESkey);
+            SecretKey mergedkey = SecurityUtil.mergeKeysInParts(UserAESkey, AppAESkey, ProxyAESkey);
+
+            //check that key is correct
+            String unencrypted4 = "test";
+            byte[] symencrypted4 = SecurityUtil.encryptSymmetrically(mergedkey, unencrypted4);
+            String symdecrypted4 = SecurityUtil.decryptSymmetrically(mergedkey, symencrypted4);
+            if (unencrypted4.equals(symdecrypted4)) {
+                logger.info("It is a valid Merged key!");
+            }
 
             //Step 4 - Query
             logger.info("Key merged - i will query");
@@ -143,7 +151,7 @@ public class DBProxyService {
             String base64encrypted = entry.getValue();
             logger.info("value: " + base64encrypted);
             byte[] base64dencryptedBytes = Base64.getDecoder().decode(base64encrypted);
-            ret = SecurityUtil.decryptSymmetrically(merged, base64dencryptedBytes);
+            ret = SecurityUtil.decryptSymmetrically(mergedkey, base64dencryptedBytes);
             logger.info("Query output: " + ret);
         } catch (Exception ex) {
             logger.severe("Exception " + ex.getMessage());
