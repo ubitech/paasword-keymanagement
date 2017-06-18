@@ -117,48 +117,6 @@ public class SecurityUtil {
 
 
 
-//    /**
-//     * Encrypts plainText in AES using the secret key
-//     *
-//     * @param plainText
-//     * @param key
-//     * @return
-//     * @throws Exception
-//     */
-//    public static byte[] encryptSymmetrically(PaaSwordSecurityKey pkey, String plainText) throws Exception {
-//        // AES defaults to AES/ECB/PKCS5Padding in Java 7
-//        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-//        cipher.init(Cipher.ENCRYPT_MODE, pkey.getKey(), pkey.getSpec());
-//        cipher.updateAAD(pkey.getAad().getBytes());
-//        byte[] byteCipherText = cipher.doFinal();
-//        return byteCipherText;
-//    }//EoM
-
-//    /**
-//     * Decrypts encrypted byte array using the key used for encryption.
-//     *
-//     * @param pkey
-//     * @param byteCipherText
-//     * @return
-//     * @throws Exception
-//     */
-//    public static String decryptSymmetrically(PaaSwordSecurityKey pkey, byte[] byteCipherText) {
-//        byte[] bytePlainText = null;
-//        try {
-//            // AES defaults to AES/ECB/PKCS5Padding in Java 7
-//            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-//            cipher.init(Cipher.DECRYPT_MODE, pkey.getKey(), pkey.getSpec());
-//
-////            cipher.updateAAD(pkey.getAad().getBytes());
-//            bytePlainText = cipher.doFinal(byteCipherText);
-//            logger.info("Decrypted: " + new String(bytePlainText));
-//
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-//        return new String(bytePlainText);
-//    }//EoM
-
     public static KeyPair generateRSAKeyPair(int bitsize) throws NoSuchAlgorithmException {   //1024 2048
         KeyPair keypair = null;
         try {

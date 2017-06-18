@@ -24,13 +24,16 @@ import eu.paasword.keymanagement.model.AppKey;
 import eu.paasword.keymanagement.model.ProxyKey;
 import eu.paasword.keymanagement.util.security.PaaSwordSecurityKey;
 import eu.paasword.keymanagement.util.security.SecurityUtil;
+import eu.paasword.keymanagement.util.security.SeparatedKeyContainer;
 import eu.paasword.keymanagement.util.transfer.AppRegistration;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
+import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedUserKeys;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
 import eu.paasword.keymanagement.util.transfer.ResponseCode;
+import eu.paasword.keymanagement.util.transfer.RestResponse;
 import java.io.UnsupportedEncodingException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -40,6 +43,7 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import sun.security.rsa.RSAPrivateCrtKeyImpl;
 import sun.security.rsa.RSAPublicKeyImpl;
 
@@ -69,68 +73,68 @@ public class TenantKeyManagementService {
         return userentryrepo.findByProxyidAndUserid(dbproxyid,userid).get(0).getUserkey();
     }//EoM
 
-//    public String createKeysForUser(String dbproxyid, String userid) throws UnsupportedEncodingException, Exception {
-//        String tenantkey = authrepo.findByProxyid(dbproxyid).get(0).getSecretkey(); //by default only one is accepted
-//        byte[] base64decodedBytes = Base64.getDecoder().decode(tenantkey);
-//        SecretKey aeskey = SecurityUtil.deSerializeObject(new String(base64decodedBytes, "utf-8"), SecretKey.class);
-//        //is it a valid aes key?
-//        String unencrypted = "test";
-//        byte[] symencrypted = SecurityUtil.encryptSymmetrically(aeskey, unencrypted);
-//        String symdecrypted = SecurityUtil.decryptSymmetrically(aeskey, symencrypted);
-//        if (unencrypted.equals(symdecrypted)) {
-//            logger.info("It is a valid key!");
-//        }
-//        //Split the keys
-//        SeparatedKeyContainer separated = SecurityUtil.splitKeyInParts(aeskey);
-//        //Create DAO entity
-//        Userentry userentry = new Userentry();
-//        userentry.setUserid(userid);
-//        userentry.setProxyid(dbproxyid);
-//        String userkeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(separated.getUserkey()).getBytes("UTF-8"));
-//        String appkeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(separated.getAppkey()).getBytes("UTF-8"));
-//        String proxykeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(separated.getProxykey()).getBytes("UTF-8"));
-//        userentry.setUserkey(userkeyasstring);
-//        userentry.setAppkey(appkeyasstring);
-//        userentry.setProxykey(proxykeyasstring);
-//        //---
-//        userentryrepo.save(userentry);
-//
-//        try {
-//            Authorizedproxy authproxy = authrepo.findByProxyid(dbproxyid).get(0);
-//            String proxyurl = authproxy.getProxyurl();
-//            String appurl = authproxy.getAppurl();
-//
-//            //fetch PubKey of Proxy
-//            RestTemplate restTemplate = new RestTemplate();
-//            String invocationurl = proxyurl + "/api/keydbproxy/getpubkey/" + dbproxyid;
-//            RestResponse result = restTemplate.getForObject(invocationurl, RestResponse.class);
-//            logger.info("PubKey of Proxy Fetched: \n" + result.getReturnobject());
-//            byte[] base64decodedBytes1 = Base64.getDecoder().decode((String) result.getReturnobject());
-//            PublicKey pubkeyofproxy = SecurityUtil.deSerializeObject(new String(base64decodedBytes1, "utf-8"), RSAPublicKeyImpl.class);
-//            logger.info("Public Key of Proxy has been reconstructed");
-//
-//            invocationurl = appurl + "/api/paaswordapp/getpubkey/" + dbproxyid;
-//            result = restTemplate.getForObject(invocationurl, RestResponse.class);
-//            logger.info("PubKey of App Fetched: \n" + result.getReturnobject());
-//            byte[] base64decodedBytes2 = Base64.getDecoder().decode((String) result.getReturnobject());
-//            PublicKey pubkeyofapp = SecurityUtil.deSerializeObject(new String(base64decodedBytes2, "utf-8"), RSAPublicKeyImpl.class);
-//            logger.info("Public Key of App has been reconstructed");
-//
-//            //Encrypt assymetrically appkey & proxy
-//            byte[] asymencryptedappkey = SecurityUtil.encryptAssymetrically(pubkeyofapp, appkeyasstring);
-//            byte[] asymencryptedproxykey = SecurityUtil.encryptAssymetrically(pubkeyofproxy, proxykeyasstring);
-//
-//            EncryptedAndSignedUserKeys encryptedAndSignedUserKeys = new EncryptedAndSignedUserKeys(dbproxyid, userid, asymencryptedproxykey, asymencryptedappkey, null, null);
-//            invocationurl = appurl + "/api/paaswordapp/registeruser";
-//            result = restTemplate.postForObject(invocationurl, encryptedAndSignedUserKeys, RestResponse.class);
-//            logger.info("Registeruser result: \n" + result.getReturnobject());
-//
-//        } catch (Exception ex) {
-//            logger.severe("Exception during the transmition of the keys");
-//        }
-//
-//        return "ok";
-//    }//EoM
+    public String createKeysForUser(String dbproxyid, String userid) throws UnsupportedEncodingException, Exception {
+        String tenantkey = authrepo.findByProxyid(dbproxyid).get(0).getSecretkey(); //by default only one is accepted
+        byte[] base64decodedBytes = Base64.getDecoder().decode(tenantkey);
+        PaaSwordSecurityKey paeskey = SecurityUtil.deSerializeObject(new String(base64decodedBytes, "utf-8"), PaaSwordSecurityKey.class);
+        //is it a valid aes key?
+        String unencrypted = "test";
+        String symencrypted = SecurityUtil.encryptSymmetrically(paeskey, unencrypted);
+        String symdecrypted = SecurityUtil.decryptSymmetrically(paeskey, symencrypted);
+        if (unencrypted.equals(symdecrypted)) {
+            logger.info("It is a valid key!");
+        }
+        //Split the keys
+        SeparatedKeyContainer separated = SecurityUtil.splitKeyInParts(paeskey);
+        //Create DAO entity
+        Userentry userentry = new Userentry();
+        userentry.setUserid(userid);
+        userentry.setProxyid(dbproxyid);
+        String userkeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(separated.getUserkey()).getBytes("UTF-8"));
+        String appkeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(separated.getAppkey()).getBytes("UTF-8"));
+        String proxykeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(separated.getProxykey()).getBytes("UTF-8"));
+        userentry.setUserkey(userkeyasstring);
+        userentry.setAppkey(appkeyasstring);
+        userentry.setProxykey(proxykeyasstring);
+        //---
+        userentryrepo.save(userentry);
+
+        try {
+            Authorizedproxy authproxy = authrepo.findByProxyid(dbproxyid).get(0);
+            String proxyurl = authproxy.getProxyurl();
+            String appurl = authproxy.getAppurl();
+
+            //fetch PubKey of Proxy
+            RestTemplate restTemplate = new RestTemplate();
+            String invocationurl = proxyurl + "/api/keydbproxy/getpubkey/" + dbproxyid;
+            RestResponse result = restTemplate.getForObject(invocationurl, RestResponse.class);
+            logger.info("PubKey of Proxy Fetched: \n" + result.getReturnobject());
+            byte[] base64decodedBytes1 = Base64.getDecoder().decode((String) result.getReturnobject());
+            PublicKey pubkeyofproxy = SecurityUtil.deSerializeObject(new String(base64decodedBytes1, "utf-8"), RSAPublicKeyImpl.class);
+            logger.info("Public Key of Proxy has been reconstructed");
+
+            invocationurl = appurl + "/api/paaswordapp/getpubkey/" + dbproxyid;
+            result = restTemplate.getForObject(invocationurl, RestResponse.class);
+            logger.info("PubKey of App Fetched: \n" + result.getReturnobject());
+            byte[] base64decodedBytes2 = Base64.getDecoder().decode((String) result.getReturnobject());
+            PublicKey pubkeyofapp = SecurityUtil.deSerializeObject(new String(base64decodedBytes2, "utf-8"), RSAPublicKeyImpl.class);
+            logger.info("Public Key of App has been reconstructed");
+
+            //Encrypt assymetrically appkey & proxy
+            byte[] asymencryptedappkey = SecurityUtil.encryptAssymetrically(pubkeyofapp, appkeyasstring);
+            byte[] asymencryptedproxykey = SecurityUtil.encryptAssymetrically(pubkeyofproxy, proxykeyasstring);
+
+            EncryptedAndSignedUserKeys encryptedAndSignedUserKeys = new EncryptedAndSignedUserKeys(dbproxyid, userid, asymencryptedproxykey, asymencryptedappkey, null, null);
+            invocationurl = appurl + "/api/paaswordapp/registeruser";
+            result = restTemplate.postForObject(invocationurl, encryptedAndSignedUserKeys, RestResponse.class);
+            logger.info("Registeruser result: \n" + result.getReturnobject());
+
+        } catch (Exception ex) {
+            logger.severe("Exception during the transmition of the keys");
+        }
+
+        return "ok";
+    }//EoM
 
     public List<AppKey> getappkeys(String dbproxyid) {
         List<AppKey> appkeys = new ArrayList<>();

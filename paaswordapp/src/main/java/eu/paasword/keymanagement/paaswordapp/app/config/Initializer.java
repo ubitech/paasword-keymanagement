@@ -46,7 +46,8 @@ import sun.security.rsa.RSAPublicKeyImpl;
 public class Initializer {
 
     private static final Logger logger = Logger.getLogger(Initializer.class.getName());
-
+    private static final int keysize = 4096;
+    
     @Value("${dbproxy.id}")
     private String dbproxyid;
 
@@ -70,7 +71,7 @@ public class Initializer {
         if (configrepo.findAll().isEmpty() || configrepo.findAll().get(0).getPubkey() == null) {
             try {
                 logger.info("Generating key pair");
-                KeyPair keypair = SecurityUtil.generateRSAKeyPair(2048);
+                KeyPair keypair = SecurityUtil.generateRSAKeyPair(4096);
                 appconfig = new AppConfiguration();
                 appconfig.setPubkey(Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(keypair.getPublic()).getBytes("UTF-8")));
                 appconfig.setPrivkey(Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(keypair.getPrivate()).getBytes("UTF-8")));

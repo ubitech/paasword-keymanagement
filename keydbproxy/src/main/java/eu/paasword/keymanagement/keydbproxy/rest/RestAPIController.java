@@ -51,27 +51,27 @@ public class RestAPIController {
     }//EoM
 
 
-//    @RequestMapping(value = "/registeruser", method = RequestMethod.POST)
-//    public RestResponse registeruser(@RequestBody EncryptedAndSignedUserKeys encryptedandsigneduserkeys) {
-//        try {
-//            logger.info("Rest register the proxy key for a user to the database");
-//            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", dbproxy.registerUser(encryptedandsigneduserkeys));
-//        } catch (Exception ex) {
-//            logger.severe(ex.getMessage());
-//            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
-//        }
-//    }//EoM
-//
-//    @RequestMapping(value = "/query", method = RequestMethod.POST)
-//    public RestResponse query(@RequestBody QueryContext querycontext) {
-//        try {
-//            logger.info("Querying DB Proxy for " + querycontext.getQuery());
-//            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", dbproxy.queryHandler(querycontext));
-//        } catch (Exception ex) {
-//            logger.severe(ex.getMessage());
-//            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
-//        }
-//    }//EoM
+    @RequestMapping(value = "/registeruser", method = RequestMethod.POST)
+    public RestResponse registeruser(@RequestBody EncryptedAndSignedUserKeys encryptedandsigneduserkeys) {
+        try {
+            logger.info("Rest register the proxy key for a user to the database");
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", dbproxy.registerUser(encryptedandsigneduserkeys));
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM
+
+    @RequestMapping(value = "/query", method = RequestMethod.POST)
+    public RestResponse query(@RequestBody QueryContext querycontext) {
+        try {
+            logger.info("Querying DB Proxy for " + querycontext.getQuery());
+            return new RestResponse(ResponseCode.SUCCESS.name(), "Key registered successfully", dbproxy.queryHandler(querycontext));
+        } catch (Exception ex) {
+            logger.severe(ex.getMessage());
+            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+        }
+    }//EoM
     
     @RequestMapping(method = RequestMethod.GET)
     public String test() {
