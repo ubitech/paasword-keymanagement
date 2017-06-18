@@ -64,13 +64,12 @@ public class Authorizedproxy implements Serializable {
     @Column(name = "proxyurl", nullable = true)
     private String proxyurl;    
     
-    @Basic(optional = false)
-    @NotNull
+    @Basic(optional = true)
     @Size(min = 1, max = 10024)
     @Column(name = "pubkeyofapp")
     private String pubkeyofapp;    
     
-    @Basic(optional = false)
+    @Basic(optional = true)
     @Size(min = 1, max = 250)
     @Column(name = "appurl", nullable = true)
     private String appurl;     

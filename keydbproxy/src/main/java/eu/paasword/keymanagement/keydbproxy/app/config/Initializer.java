@@ -38,6 +38,7 @@ import sun.security.rsa.RSAPublicKeyImpl;
 import eu.paasword.keymanagement.keydbproxy.repository.dao.ConfigurationRepository;
 import eu.paasword.keymanagement.keydbproxy.repository.dao.DbentryRepository;
 import eu.paasword.keymanagement.keydbproxy.repository.domain.Dbentry;
+import eu.paasword.keymanagement.util.security.PaaSwordSecurityKey;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedSecretKey;
 import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
 
@@ -49,7 +50,8 @@ import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
 public class Initializer {
 
     private static final Logger logger = Logger.getLogger(Initializer.class.getName());
-
+    private static final int keysize = 4096;
+            
     @Value("${dbproxy.id}")
     private String dbproxyid;
 
@@ -73,7 +75,7 @@ public class Initializer {
         if (configrepo.findAll().isEmpty() || configrepo.findAll().get(0).getPubkey() == null) {
             try {
                 logger.info("Generating key pair");
-                KeyPair keypair = SecurityUtil.generateRSAKeyPair(2048);
+                KeyPair keypair = SecurityUtil.generateRSAKeyPair(keysize);
                 proxyconfig = new ProxyConfiguration();
                 proxyconfig.setPubkey(Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(keypair.getPublic()).getBytes("UTF-8")));
                 proxyconfig.setPrivkey(Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(keypair.getPrivate()).getBytes("UTF-8")));
@@ -148,7 +150,7 @@ public class Initializer {
             logger.info("Generate Symmetric key and encrypt the database");
             try {
                 //Generate
-                SecretKey aeskey = SecurityUtil.generateAESKey();
+                PaaSwordSecurityKey aeskey = SecurityUtil.generateAESKey();
                 String secretkeyasstring = Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(aeskey).getBytes("UTF-8"));
                 //Store
                 proxyconfig.setSecretkey(secretkeyasstring);
@@ -158,7 +160,7 @@ public class Initializer {
                 for (int i = 1; i < 10; i++) {
                     Dbentry dbentry = new Dbentry();
                     dbentry.setKey("key" + i);
-                    dbentry.setValue(Base64.getEncoder().encodeToString(SecurityUtil.encryptSymmetrically(aeskey, "value" + i)));
+                    dbentry.setValue(SecurityUtil.encryptSymmetrically(aeskey, "value" + i));
                     dbrepo.save(dbentry);
                 }//for
                 
@@ -166,8 +168,7 @@ public class Initializer {
                 Dbentry entry = dbrepo.findByKey("key1").get(0);
                 //decrypt-process of stored value
                 String base64encrypted = entry.getValue();
-                byte[] base64dencryptedBytes = Base64.getDecoder().decode(base64encrypted);
-                String output = SecurityUtil.decryptSymmetrically(aeskey, base64dencryptedBytes);
+                String output = SecurityUtil.decryptSymmetrically(aeskey, base64encrypted);
                 logger.info("expected: value1 found: " + output);
 
                 //save the generated key

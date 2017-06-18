@@ -48,7 +48,7 @@ public class SecurityUtil {
     // AES-GCM parameters
     public static final int AES_KEY_SIZE = 128; // in bits
     public static final int GCM_NONCE_LENGTH = 12; // in bytes
-    public static final int GCM_TAG_LENGTH = 16; // in bytes
+
 
     public static PaaSwordSecurityKey generateAESKey() {
         SecretKey key = null;
@@ -63,54 +63,51 @@ public class SecurityUtil {
             logger.info("Key created: " + key);
             random = new Random();               //SecureRandom.getInstanceStrong(); add to /dev/./random            
             //nonce
-            final byte[] nonce = new byte[GCM_NONCE_LENGTH];
-            random.nextBytes(nonce);
-            GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, nonce);
-            //aad
-            String aad = "" + random.nextInt();
-            pkey = new PaaSwordSecurityKey(key, spec, aad);
+            byte[] iv = new byte[GCM_NONCE_LENGTH];
+            random.nextBytes(iv);
+//            GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+
+            pkey = new PaaSwordSecurityKey(key, iv);
         } catch (NoSuchAlgorithmException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
         return pkey;
     } //EoM    
     
-    public static String encryptSymmetrically(SecretKey key,String unencryptedstring ) throws Exception {
+    public static String encryptSymmetrically(PaaSwordSecurityKey pkey,String unencryptedstring ) throws Exception {
         SecureRandom r = SecureRandom.getInstance("SHA1PRNG");
         // Generate 128 bit IV for Encryption
-        byte[] iv = new byte[12];
-        r.nextBytes(iv);
 
 //        SecretKeySpec eks = new SecretKeySpec(key, "AES");
         Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
 
         // Generated Authentication Tag should be 128 bits
-        c.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128, iv));
+        c.init(Cipher.ENCRYPT_MODE, pkey.getKey(), new GCMParameterSpec(128, pkey.getIv()) );
         byte[] es = c.doFinal(unencryptedstring.getBytes(StandardCharsets.UTF_8));
 
         // Construct Output as "IV + CIPHERTEXT"
-        byte[] os = new byte[12 + es.length];
-        System.arraycopy(iv, 0, os, 0, 12);
-        System.arraycopy(es, 0, os, 12, es.length);
+        byte[] os = new byte[GCM_NONCE_LENGTH + es.length];
+        System.arraycopy(pkey.getIv(), 0, os, 0, GCM_NONCE_LENGTH);
+        System.arraycopy(es, 0, os, GCM_NONCE_LENGTH, es.length);
 
         // Return a Base64 Encoded String
         return Base64.getEncoder().encodeToString(os);
 
     }//EoM
 
-    public static String decryptSymmetrically(SecretKey key,String encryptedstring) throws Exception {
+    public static String decryptSymmetrically(PaaSwordSecurityKey pkey,String encryptedstring) throws Exception {
         // Recover our Byte Array by Base64 Decoding
         byte[] os = Base64.getDecoder().decode(encryptedstring);
 
         // Check Minimum Length (IV (12) + TAG (16))
         if (os.length > 28) {
-            byte[] iv = Arrays.copyOfRange(os, 0, 12);
-            byte[] es = Arrays.copyOfRange(os, 12, os.length);
+            byte[] iv = Arrays.copyOfRange(os, 0, GCM_NONCE_LENGTH);
+            byte[] es = Arrays.copyOfRange(os, GCM_NONCE_LENGTH, os.length);
 
             // Perform Decryption
 //            SecretKeySpec dks = new SecretKeySpec(key, "AES");
             Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
-            c.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, iv));
+            c.init(Cipher.DECRYPT_MODE, pkey.getKey(), new GCMParameterSpec(128, pkey.getIv()));
 
             // Return our Decrypted String
             return new String(c.doFinal(es), StandardCharsets.UTF_8);
@@ -258,9 +255,9 @@ public class SecurityUtil {
         SecretKey generatedkey = new SecretKeySpec(encodedbytes, pkey.getKey().getAlgorithm());
 
         SeparatedKeyContainer separated = new SeparatedKeyContainer(
-                new PaaSwordSecurityKey(random1key, pkey.getSpec(), pkey.getAad()),
-                new PaaSwordSecurityKey(random2key, pkey.getSpec(), pkey.getAad()),
-                new PaaSwordSecurityKey(generatedkey, pkey.getSpec(), pkey.getAad())
+                new PaaSwordSecurityKey(random1key, pkey.getIv()),
+                new PaaSwordSecurityKey(random2key, pkey.getIv()),
+                new PaaSwordSecurityKey(generatedkey, pkey.getIv())
         );
         return separated;
     }//EoM
@@ -269,7 +266,7 @@ public class SecurityUtil {
         byte[] encodedbytes = XORByteArrays(userkey.getKey().getEncoded(), appkey.getKey().getEncoded());
         encodedbytes = XORByteArrays(encodedbytes, proxykey.getKey().getEncoded());
         SecretKey generatedkey = new SecretKeySpec(encodedbytes, userkey.getKey().getAlgorithm());
-        PaaSwordSecurityKey ret = new PaaSwordSecurityKey(generatedkey, userkey.getSpec(), userkey.getAad());
+        PaaSwordSecurityKey ret = new PaaSwordSecurityKey(generatedkey, userkey.getIv());
         return ret;
     }//EoM    
 

@@ -42,7 +42,8 @@ import eu.paasword.keymanagement.keytenantadmin.repository.domain.Tenantconfig;
 public class Initializer {
     
     private static final Logger logger = Logger.getLogger(Initializer.class.getName());
-        
+    private static final int keysize = 4096;
+    
     @Autowired
     TenantconfigRepository configrepo;    
     
@@ -54,7 +55,7 @@ public class Initializer {
         if (configrepo.findAll().isEmpty()) {
             try {
                 logger.info("Generating key pair");
-                KeyPair keypair = SecurityUtil.generateRSAKeyPair(2048);
+                KeyPair keypair = SecurityUtil.generateRSAKeyPair(keysize);
                 config = new Tenantconfig();
                 config.setPubkey(Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(keypair.getPublic()).getBytes("UTF-8")));
                 config.setPrivkey(Base64.getEncoder().encodeToString(SecurityUtil.serializeObject(keypair.getPrivate()).getBytes("UTF-8")));

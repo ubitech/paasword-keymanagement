@@ -17,16 +17,9 @@ package eu.paasword.keymanagement.test;
 
 import eu.paasword.keymanagement.util.security.PaaSwordSecurityKey;
 import eu.paasword.keymanagement.util.security.SecurityUtil;
-import static eu.paasword.keymanagement.util.security.SecurityUtil.AES_KEY_SIZE;
 import eu.paasword.keymanagement.util.security.SeparatedKeyContainer;
 import java.security.KeyPair;
-import java.util.Random;
 import java.util.logging.Logger;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  *
@@ -43,9 +36,9 @@ public class SecurityUtilTest {
         PaaSwordSecurityKey pkey = SecurityUtil.generateAESKey();
 
         logger.info("\nalgorithm: " + pkey.getKey().getAlgorithm() + " format: " + pkey.getKey().getFormat() + " " + pkey.getClass()); //javax.crypto.spec.SecretKeySpec        
-        String symencrypted = SecurityUtil.encryptSymmetrically(pkey.getKey(), unencrypted);
+        String symencrypted = SecurityUtil.encryptSymmetrically(pkey, unencrypted);
         logger.info("\nencrypted-cipher:" + symencrypted);
-        String symdecrypted = SecurityUtil.decryptSymmetrically(pkey.getKey(),symencrypted);
+        String symdecrypted = SecurityUtil.decryptSymmetrically(pkey,symencrypted);
         //symdecrypted = SecurityUtil.decryptSymmetrically(pkey, symencrypted);
         //symdecrypted = SecurityUtil.decryptSymmetrically(pkey, symencrypted);
 
@@ -71,15 +64,17 @@ public class SecurityUtilTest {
         logger.info("\nuserkey: "+separated.getUserkey().getKey().toString() + "\nproxykey: " + separated.getProxykey().getKey().toString() + "\nappkey: " + separated.getAppkey().getKey().toString() );
 
         PaaSwordSecurityKey merged = SecurityUtil.mergeKeysInParts(separated.getUserkey(), separated.getAppkey(), separated.getProxykey());
-        logger.info("merged.getKey: "+merged.getKey().toString() +" spec: "+merged.getSpec()+" aad "+merged.getAad());
+        logger.info("merged.getKey: "+merged.getKey().toString() +" spec: "+merged.getIv() );
         
 
-        String symencrypted2 = SecurityUtil.encryptSymmetrically(pkey.getKey(), unencrypted);
+        String symencrypted2 = SecurityUtil.encryptSymmetrically(pkey, unencrypted);
         logger.info("encrypted-cipher:"+symencrypted2);        
-        String symdecryptedbytes = SecurityUtil.decryptSymmetrically(pkey.getKey(), symencrypted2);
+        String symdecryptedbytes = SecurityUtil.decryptSymmetrically(pkey, symencrypted2);
         logger.info(" unencrypted: " + unencrypted + " encrypted: " + symencrypted2 + " decrypted: " + symdecryptedbytes);        
     }//EoM
 
+    
+    
 //    public static void main(String[] args) throws Exception {
 //        byte[] data  = null;
 //        byte[] encrypted = null;

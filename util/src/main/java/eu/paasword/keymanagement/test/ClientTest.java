@@ -1,6 +1,8 @@
 package eu.paasword.keymanagement.test;
 
 import eu.paasword.keymanagement.util.security.SecurityUtil;
+import eu.paasword.keymanagement.util.transfer.AppRegistration;
+import eu.paasword.keymanagement.util.transfer.ProxyRegistration;
 import eu.paasword.keymanagement.util.transfer.QueryContext;
 import eu.paasword.keymanagement.util.transfer.RestResponse;
 import java.security.PublicKey;
@@ -20,13 +22,30 @@ public class ClientTest {
     private static String tenantadminurl = "http://127.0.0.1:8081";
     private static String proxyurl = "http://127.0.0.1:8080";
     private static String appurl = "http://127.0.0.1:8082";
-
-//    public static void main(String[] args) {
-//        RestTemplate restTemplate = new RestTemplate();
-//        RestResponse result = null;
-//        String invocationurl;
-//        try {
-//            String proxyid = "1234567";
+    
+    
+    private static String proxyid = "1234567";
+    private static String proxypubkey="wqzDrQAFc3IAFGphdmEuc2VjdXJpdHkuS2V5UmVwwr3DuU/Cs8KIwprCpUMCAARMAAlhbGdvcml0aG10ABJMamF2YS9sYW5nL1N0cmluZztbAAdlbmNvZGVkdAACW0JMAAZmb3JtYXRxAH4AAUwABHR5cGV0ABtMamF2YS9zZWN1cml0eS9LZXlSZXAkVHlwZTt4cHQAA1JTQXVyAAJbQsKsw7MXw7gGCFTDoAIAAHhwAAABJjDCggEiMA0GCSrChkjChsO3DQEBAQUAA8KCAQ8AMMKCAQoCwoIBAQDCmjM/wozDlgtdwopcw48RED3CmsKnwojDkcKXw6LDj8KdwqV2bVU8wp3ClEFewrI1w4jCoFELw7k+wpV9wpPDnTnDjcKSwrNiwpA3wqdlw74hwqtPJlnDjMOwKFFjSkbDoyRYw4fCt0svVMKsw47ClsK2wr7Do0bCr0MJHVnCuXXCi8KyNDHCvcKCTzrCqcOiwoXCqMK5dsOUwrIEO0UBwps6Rn7CusKmwpPCtzJ9wowsax0rwppgVXDDg1DCgWbDtDwEH8OXYFoPbG7CpcKMwo/DuGDDnMKpDSgpwrVtXgzClMO6PMKiITIrwp9IRhZvasODw7bCuxLDmsKGbmcTQTI2LW/Du2jDvsKIwo/DnsKkw4oJwopSEFo7DQYtwqzCicOYw53DvcKcw7NRS8OuPcK0eBxIwoFJeypSGcKeJsKvw70OwqVDwpFDw5XCr8OSVsOJw7Yyw69Xw5QYNFTDm8KTHsO5dcKkNsOWB0rCux3DisOjwqVLAgMBAAF0AAVYLjUwOX5yABlqYXZhLnNlY3VyaXR5LktleVJlcCRUeXBlAAAAAAAAAAASAAB4cgAOamF2YS5sYW5nLkVudW0AAAAAAAAAABIAAHhwdAAGUFVCTElD";
+    private static String apppubkey="wqzDrQAFc3IAFGphdmEuc2VjdXJpdHkuS2V5UmVwwr3DuU/Cs8KIwprCpUMCAARMAAlhbGdvcml0aG10ABJMamF2YS9sYW5nL1N0cmluZztbAAdlbmNvZGVkdAACW0JMAAZmb3JtYXRxAH4AAUwABHR5cGV0ABtMamF2YS9zZWN1cml0eS9LZXlSZXAkVHlwZTt4cHQAA1JTQXVyAAJbQsKsw7MXw7gGCFTDoAIAAHhwAAABJjDCggEiMA0GCSrChkjChsO3DQEBAQUAA8KCAQ8AMMKCAQoCwoIBAQDCt8ODYMODw6tQw4gEw7PDmhdwwp/CkcOADE84ew02DMOLRFJGXyTCvGYewrMfc8OHW8KMHcOLwpnDnWQHw5I3Y8KGI1N5w5tWwqfDjcOsw5gjcMOBw7zCr8O7e2A7SMOCw4Ezw5IILcOpw63CucOAwpDCkGg+Mk7CiMKPWjXCj8KlGT4gRzbCk8OLwoHDgsKJbcOhwohww7IxZkbDhsK7w54IwrfCv8O9w4Z5ERjDosO9w7PDnxpgHcOGIsOpwpHCpBfCvSw7woBoW8KQNWACwot+w6Y6wqHDicOTw67CtsOtw7DDnMKHQXbDs8KiV8O5AR7CoMOWw7VYwp0AwpnCqhHCvsOjZC7DqToaXjpUw5LDp3rDkxM5QwQfZsKCPD0mwobCgTvCrcKrMsKdwpnCuHfDvsO4BVDDtGHDvMKiw4Vxw5YAwr1Mw5PCgMOMfBFEw7hQwpJcZTLCm17ChD3DiMKjwoDCiMOAbn1rTcKKw6vCthEfLsKXwpdHwo5uw4cnAgMBAAF0AAVYLjUwOX5yABlqYXZhLnNlY3VyaXR5LktleVJlcCRUeXBlAAAAAAAAAAASAAB4cgAOamF2YS5sYW5nLkVudW0AAAAAAAAAABIAAHhwdAAGUFVCTElD";
+    
+    public static void main(String[] args) {
+        RestTemplate restTemplate = new RestTemplate();
+        RestResponse result = null;
+        String invocationurl;
+        try {
+            //register a new proxy
+            invocationurl = tenantadminurl + "/api/keytenantadmin/registerproxy";
+            ProxyRegistration proxyregistration = new ProxyRegistration(proxyid, proxypubkey, proxyurl);
+            result = restTemplate.postForObject(invocationurl, proxyregistration, RestResponse.class);
+            logger.info("Proxy registered: "+result);
+            
+            //register a new app
+            invocationurl = tenantadminurl + "/api/keytenantadmin/registerapp";
+            AppRegistration appregistration = new AppRegistration(proxyid, apppubkey, appurl);
+            result = restTemplate.postForObject(invocationurl, appregistration, RestResponse.class);
+            logger.info("App registered: "+result);            
+            
+            
 //            String userid = "12";
 //            //Step 1 Register User            
 //            invocationurl = tenantadminurl + "/api/keytenantadmin/registeruser/" + proxyid + "/" + userid;
@@ -66,10 +85,11 @@ public class ClientTest {
 //            invocationurl = appurl + "/api/paaswordapp/query";
 //            result = restTemplate.postForObject(invocationurl, query, RestResponse.class);
 //            logger.info("result: " + result.getReturnobject());
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//            logger.severe("Exception during the invocation of register key to proxy");
-//        }
-//    }//EoM
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.severe("Exception during the invocation of register key to proxy");
+        }
+        
+    }//EoM
 
 }//EoC

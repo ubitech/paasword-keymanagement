@@ -19,6 +19,7 @@ import eu.paasword.keymanagement.paaswordapp.repository.dao.AppconfigRepository;
 import java.util.logging.Logger;
 import eu.paasword.keymanagement.paaswordapp.repository.dao.UserentryRepository;
 import eu.paasword.keymanagement.paaswordapp.repository.domain.Userentry;
+import eu.paasword.keymanagement.util.security.PaaSwordSecurityKey;
 import eu.paasword.keymanagement.util.security.SecurityUtil;
 import eu.paasword.keymanagement.util.transfer.QueryContext;
 import eu.paasword.keymanagement.util.transfer.EncryptedAndSignedUserKeys;
@@ -66,10 +67,10 @@ public class PaaSwordService {
             String asymdecryptedkeyasstring = SecurityUtil.decryptAssymetrically(privkey, encryptedandsigneduserkeys.getAsymencryptedappkey());
             //cast it to verify that it is a valid key
             byte[] base64decodedBytes2 = Base64.getDecoder().decode(asymdecryptedkeyasstring);
-            SecretKey aeskey = SecurityUtil.deSerializeObject(new String(base64decodedBytes2, "utf-8"), SecretKey.class);
+            PaaSwordSecurityKey paeskey = SecurityUtil.deSerializeObject(new String(base64decodedBytes2, "utf-8"), PaaSwordSecurityKey.class);
             String testmsg = "test input";
-            byte[] symencrypted = SecurityUtil.encryptSymmetrically(aeskey, testmsg);
-            String symdecrypted = SecurityUtil.decryptSymmetrically(aeskey, symencrypted);
+            String symencrypted = SecurityUtil.encryptSymmetrically(paeskey, testmsg);
+            String symdecrypted = SecurityUtil.decryptSymmetrically(paeskey, symencrypted);
             if (symdecrypted.equalsIgnoreCase(testmsg)) {
                 logger.info("Secret key was decrypted and casted");
             }

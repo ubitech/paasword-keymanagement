@@ -94,15 +94,15 @@ public class RestAPIController {
     /*
     *  This method
      */
-    @RequestMapping(value = "/registeruser/{dbproxyid}/{userid}", method = RequestMethod.GET)
-    public RestResponse registeruser(@PathVariable("dbproxyid") String dbproxyid, @PathVariable("userid") String userid) {
-        try {
-            return new RestResponse(ResponseCode.SUCCESS.name(), "User was successfully added", tkm.createKeysForUser(dbproxyid, userid));
-        } catch (Exception ex) {
-            logger.severe(ex.getMessage());
-            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
-        }
-    }//EoM
+//    @RequestMapping(value = "/registeruser/{dbproxyid}/{userid}", method = RequestMethod.GET)
+//    public RestResponse registeruser(@PathVariable("dbproxyid") String dbproxyid, @PathVariable("userid") String userid) {
+//        try {
+//            return new RestResponse(ResponseCode.SUCCESS.name(), "User was successfully added", tkm.createKeysForUser(dbproxyid, userid));
+//        } catch (Exception ex) {
+//            logger.severe(ex.getMessage());
+//            return new RestResponse(ResponseCode.EXCEPTION.name(), ex.getMessage(), Optional.empty());
+//        }
+//    }//EoM
 
     /*
     *  This method

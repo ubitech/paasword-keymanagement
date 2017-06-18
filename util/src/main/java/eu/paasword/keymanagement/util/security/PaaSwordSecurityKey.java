@@ -1,23 +1,18 @@
 package eu.paasword.keymanagement.util.security;
 
+import java.io.Serializable;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
-public class PaaSwordSecurityKey {
+public class PaaSwordSecurityKey implements Serializable{
 
     private SecretKey key;
-    private GCMParameterSpec spec;      //nonce xor
-    private String aad;                 // getBytes()-->xor 
+    private byte[] iv;      //nonce xor
 
-    public PaaSwordSecurityKey(SecretKey key, GCMParameterSpec spec, String aad) {
+        
+    public PaaSwordSecurityKey(SecretKey key, byte[] iv) {
         this.key = key;
-        this.spec = spec;
-        this.aad = aad;
-    }       
-    
-    public PaaSwordSecurityKey(SecretKey key, GCMParameterSpec spec) {
-        this.key = key;
-        this.spec = spec;
+        this.iv = iv;
     }    
     
     public SecretKey getKey() {
@@ -28,20 +23,12 @@ public class PaaSwordSecurityKey {
         this.key = key;
     }
 
-    public GCMParameterSpec getSpec() {
-        return spec;
+    public byte[] getIv() {
+        return iv;
     }
 
-    public void setSpec(GCMParameterSpec spec) {
-        this.spec = spec;
+    public void setIv(byte[] iv) {
+        this.iv = iv;
     }    
-
-    public String getAad() {
-        return aad;
-    }
-
-    public void setAad(String aad) {
-        this.aad = aad;
-    }        
     
 }//EoC
